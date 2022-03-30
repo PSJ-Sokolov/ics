@@ -1,3 +1,4 @@
+from enum import Enum
 import random
 from mesa import Agent
 
@@ -5,15 +6,22 @@ class Cell(Agent):
     '''Description of the grid points of the CA'''
 
     # Definitions of state variables    
-    Susceptible = 1
-    Infected = 2
-    Recovered = 3
+    # Susceptible = 1
+    # Infected = 2
+    # Recovered = 3
+    # Use enum instead
+    class CellState(Enum):
+        # We use tuples to colour the cells later on.
+        SUSCEPTIBLE = "grey"
+        INFECTED    = "red"
+        RECOVERED   = "blue"
     
     def __init__(self,pos,model,init_state=0):
         '''Create cell in given x,y position, with given initial state'''
         super().__init__(pos,model)
         self.x,self.y = pos
         self.state = init_state
+
         self.timecounter = 0 #Duration infection
         self.inf = 0.0 #Infectivity
         self.infduration = 0
