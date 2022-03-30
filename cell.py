@@ -3,34 +3,37 @@ import random
 from mesa import Agent
 
 class Cell(Agent):
-    '''Description of the grid points of the CA'''
-
-    # Definitions of state variables    
-    # Susceptible = 1
-    # Infected = 2
-    # Recovered = 3
-    # Use enum instead
+    """Description of the grid points of the CA"""
     class CellState(Enum):
-        # We use tuples to colour the cells later on.
+        """An enum that determines the states that the cells in our CA can be in.
+
+        Because we use a SIR model they can either be S -- SUSCEPTIBLE, I -- INFECTED, or R -- RECOVERED
+        
+        We use the values to colour the cells later on (in server.py).
+        """
         SUSCEPTIBLE = "grey"
         INFECTED    = "red"
         RECOVERED   = "blue"
     
-    def __init__(self,pos,model,init_state=0):
-        '''Create cell in given x,y position, with given initial state'''
-        super().__init__(pos,model)
-        self.x,self.y = pos
-        self.state = init_state
+    def __init__(self, position, model, initial_state = 0):
+        """Create cell in given x,y position, with given initial state"""
+        # Ceremony for the super class:
+        super().__init__(positon,model)
+        self.x,self.y           = pos
+        self.state              = init_state
 
-        self.timecounter = 0 #Duration infection
-        self.inf = 0.0 #Infectivity
-        self.infduration = 0
-        self._nextstate = None
-        self._nextinf = None
-        self._nextinfduration = None
+        # Ceremony for the framework:
+        self._nextstate         = None
+        self._nextinf           = None
+        self._nextinfduration   = None
+
+        # Stuff that is relevant to our model:
+        self.time               = 0          # Duration infection
+        self.infection_duration = 0
+        self.infection          = 0.0        # Infectivity
 
     def step(self):
-        '''Compute the next state of a cell'''
+        """Compute the next state of a cell"""
         # Assume cell is unchanged, unless something happens below
         self._nextinf = self.inf
         self._nextinfduration = self.infduration
