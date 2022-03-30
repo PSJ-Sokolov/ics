@@ -9,9 +9,7 @@ You don't need to know this stuff, but could be nice to now.
 ## Some resources explaing git:
 ### A video
 
-<p align="center">
-<iframe width="560" height="315" src="https://www.youtube.com/embed/hwP7WQkmECE" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</p>
+- [The video]( https://youtu.be/hwP7WQkmECE)
 
 ### Some more resources
 All these links also have more information / tutorials on how to get started with Git.
