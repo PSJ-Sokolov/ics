@@ -11,11 +11,14 @@ def portrayCell(cell):
                  "h": 1,
                  "Filled": "true",
                  "Layer": 1,
-                 "Color": "white"} # Default colour, used for empty cells.
+                 "Color": "white"} # Default colour, used for empty cells
     if cell.state == cell.Susceptible:
         portrayal["Color"] = "grey"
     elif cell.state == cell.Infected:
         portrayal["Color"] = "red"
+    elif cell.state == cell.Recovered:
+        portrayal["Color"] = "blue"
+
 
     return portrayal
 

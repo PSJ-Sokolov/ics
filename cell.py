@@ -7,14 +7,15 @@ class Cell(Agent):
     # Definitions of state variables    
     Susceptible = 1
     Infected = 2
+    Recovered = 3
     
     def __init__(self,pos,model,init_state=0):
         '''Create cell in given x,y position, with given initial state'''
         super().__init__(pos,model)
         self.x,self.y = pos
         self.state = init_state
-        self.timecounter = 0
-        self.inf = 0.0
+        self.timecounter = 0 #Duration infection
+        self.inf = 0.0 #Infectivity
         self.infduration = 0
         self._nextstate = None
         self._nextinf = None
@@ -28,21 +29,23 @@ class Cell(Agent):
         self._nextstate = self.state
         
         # Empty squares - potential reproduction of susceptibles
-        if self.state == 0:
-            Susneighbors = 0
-            neis = self.model.grid.get_neighbors((self.x, self.y), moore=True, include_center=False)
-            for nei in neis:
-                if nei.state == self.Susceptible:
-                    Susneighbors += 1
-            if Susneighbors > 0:
-                if random.random() < self.model.r*Susneighbors:
-                    self._nextstate = self.Susceptible
+        # No reproduction 
+        #if self.state == 0:
+        #   Susneighbors = 0
+        #   neis = self.model.grid.get_neighbors((self.x, self.y), moore=True, include_center=False)
+        #   for nei in neis:
+        #       if nei.state == self.Susceptible:
+        #            Susneighbors += 1
+        #    if Susneighbors > 0:
+        #        if random.random() < self.model.r*Susneighbors:
+        #            self._nextstate = self.Susceptible
 
         # Susceptibles - might die or get infected
-        elif self.state == self.Susceptible:
+        if self.state == self.Susceptible:
             # Natural death
-            if random.random() < self.model.d:
-                self._nextstate = 0
+            #if random.random() < self.model.d:
+            if False:
+            #    self._nextstate = 0
             # Infection?
             else:
                 neis = self.model.grid.get_neighbors((self.x, self.y), moore=True, include_center=False)
@@ -68,16 +71,28 @@ class Cell(Agent):
                                 break
 
         # Infected - might die naturally or die after disease_duration
+        #Becomr R instead Empty
+        #elif self.state == self.Infected:
+        #    # Natural death or death by disease
+        #    if random.random() < self.model.d or self.timecounter > self.infduration:
+        #        self._nextstate = 0
+        #        self._nextinf = 0.0
+        #        self._nextinfduration = 0
+        #        self.timecounter = 0
+        #    # Else count how long it has been ill and apply potential mutations
+        #    else:
+        #        self.timecounter += 1
+
         elif self.state == self.Infected:
             # Natural death or death by disease
-            if random.random() < self.model.d or self.timecounter > self.infduration:
-                self._nextstate = 0
+            if  self.timecounter > self.infduration:
+                self._nextstate = self.Recovered
                 self._nextinf = 0.0
                 self._nextinfduration = 0
                 self.timecounter = 0
             # Else count how long it has been ill and apply potential mutations
             else:
-                self.timecounter += 1
+                self.timecounter += 1        
 
     def advance(self): 
         self.state = self._nextstate
