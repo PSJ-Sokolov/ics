@@ -1,3 +1,4 @@
+from cell import CellState
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.modules import ChartModule
 from mesa.visualization.ModularVisualization import ModularServer
@@ -12,11 +13,11 @@ def portrayCell(cell):
                  "Filled": "true",
                  "Layer": 1,
                  "Color": "white"} # Default colour, used for empty cells
-    if cell.state == cell.Susceptible:
+    if cell.state == CellState.SUSCEPTIBLE:
         portrayal["Color"] = "grey"
-    elif cell.state == cell.Infected:
+    elif cell.state == CellState.INFECTED:
         portrayal["Color"] = "red"
-    elif cell.state == cell.Recovered:
+    elif cell.state == CellState.RECOVERED:
         portrayal["Color"] = "blue"
 
 
