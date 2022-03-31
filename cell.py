@@ -8,13 +8,13 @@ class Cell(Agent):
         """An enum that determines the states that the cells in our CA can be in.
 
         Because we use a SIR model they can either be S -- SUSCEPTIBLE, I -- INFECTED, or R -- RECOVERED
-        
+
         We use the values to colour the cells later on (in server.py).
         """
         SUSCEPTIBLE = "grey"
         INFECTED    = "red"
         RECOVERED   = "blue"
-    
+
     def __init__(self, position, model, initial_state = 0):
         """Create cell in given x,y position, with given initial state"""
         # Ceremony for the super class:
@@ -38,7 +38,7 @@ class Cell(Agent):
         self._nextinf = self.inf
         self._nextinfduration = self.infduration
         self._nextstate = self.state
-        
+
         # Susceptibles - might die or get infected
         if self.state == self.Susceptible:
             # Natural death
@@ -78,9 +78,9 @@ class Cell(Agent):
                 self.timecounter = 0
             # Else count how long it has been ill and apply potential mutations
             else:
-                self.timecounter += 1        
+                self.timecounter += 1
 
-    def advance(self): 
+    def advance(self):
         self.state = self._nextstate
         self.inf = self._nextinf
         self.infduration = self._nextinfduration
