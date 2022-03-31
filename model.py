@@ -41,7 +41,7 @@ class SIRModel(Model):
                 cell.state              = CellState.INFECTED
                 cell.infectivity        = self.infectivity
                 cell.infection_duration = self.infection_duration
-                cell.timecounter        = random.randint(0, self.infection_duration)
+                cell.time               = random.randint(0, self.infection_duration)
             else:
                 cell.state = CellState.SUSCEPTIBLE
             self.grid.place_agent(cell, (x,y))
