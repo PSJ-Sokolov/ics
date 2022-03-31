@@ -1,11 +1,11 @@
 import logging
+import random
+from enum import Enum, auto
+from mesa import Agent
+
 #logging.basicConfig(level=logging.WARNING)
 logging.basicConfig(level=logging.DEBUG)
 DEBUG = logging.debug
-
-from enum import Enum, auto
-import random
-from mesa import Agent
 
 class CellState(Enum):
     """An enum that determines the states that the cells in our CA can be in.

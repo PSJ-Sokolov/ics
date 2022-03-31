@@ -1,13 +1,16 @@
+# STD IMPORT
 import random
 from statistics import mean
 
-from mesa import Model
-from mesa.time import SimultaneousActivation # updating scheme for synchronous updating
-from mesa.time import RandomActivation # for asynchronous updating
-from mesa.space import SingleGrid # spatial grid
-from mesa.datacollection import DataCollector # Data collection, to plot mean infectivity
+# MESA:
+from mesa                import Model
+from mesa.datacollection import DataCollector          # Data collection, to plot mean infectivity
+from mesa.space          import SingleGrid             # spatial grid
+from mesa.time           import RandomActivation       # for asynchronous updating
+from mesa.time           import SimultaneousActivation # updating scheme for synchronous updating
 
-from cell import Cell, CellState # Function that describes behaviour of single cells
+# USER IMPORT:
+from cell                import Cell, CellState        # Function that describes behaviour of single cells
 
 CS, cs = CellState, lambda m: m.schedule.agents
 def fracN(s):

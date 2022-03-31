@@ -1,13 +1,18 @@
+# STD INCLUDE:
 import logging
-logging.basicConfig(level=logging.WARNING)
-DEBUG = logging.debug
 
-from mesa.visualization.modules import CanvasGrid
-from mesa.visualization.modules import ChartModule
+# MESA INCLUDE:
+from mesa.visualization.modules              import CanvasGrid
+from mesa.visualization.modules              import ChartModule
 from mesa.visualization.ModularVisualization import ModularServer
 
-from cell import CellState
+# USER INCLUDE:
+from cell  import CellState
 from model import SIRModel
+
+# USER CONFIG:
+logging.basicConfig(level=logging.WARNING)
+DEBUG = logging.debug
 
 COLORS = {
     CellState.SUSCEPTIBLE : 'white',
@@ -28,7 +33,6 @@ def portrayCell(cell):
     DEBUG(f"Cell at {cell.x, cell.y} with state: {cell.state}")
     portrayal["Color"] = COLORS[cell.state]
     return portrayal
-
 
 """ Construct the simulation grid, all cells displayed as 5x5 squares """
 gridwidth = 100 # Change these parameters to change the grid size
