@@ -18,9 +18,9 @@ class Cell(Agent):
     def __init__(self, position, model, initial_state = CellState.SUSCEPTIBLE):
         """Create cell in given x,y position, with given initial state"""
         # Ceremony for the super class:
-        super().__init__(positon,model)
-        self.x,self.y           = pos
-        self.state              = init_state
+        super().__init__(position,model)
+        self.x,self.y           = position
+        self.state              = initial_state
 
         # Ceremony for the framework:
         self._nextstate         = None
@@ -35,9 +35,9 @@ class Cell(Agent):
     def step(self):
         """Compute the next state of a cell"""
         # Assume cell is unchanged, unless something happens below
-        self._nextinf = self.inf
+        self._nextinf         = self.inf
         self._nextinfduration = self.infduration
-        self._nextstate = self.state
+        self._nextstate       = self.state
 
         # Susceptibles - might die or get infected
         if self.state == CellState.SUSCEPTIBLE:
@@ -72,16 +72,16 @@ class Cell(Agent):
 
         elif self.state == CellState.SUSCEPTIBLE:
             # Natural death or death by disease
-            if  self.timecounter > self.infduration:
-                self._nextstate = self.Recovered
-                self._nextinf = 0.0
+            if  self.timecounter > self.infection_duration:
+                self._nextstate       = self.Recovered
+                self._nextinf         = 0.0
                 self._nextinfduration = 0
-                self.timecounter = 0
+                self.timecounter      = 0
             # Else count how long it has been ill and apply potential mutations
             else:
                 self.timecounter += 1
 
     def advance(self):
-        self.state = self._nextstate
-        self.inf = self._nextinf
+        self.state       = self._nextstate
+        self.inf         = self._nextinf
         self.infduration = self._nextinfduration
