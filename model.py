@@ -23,22 +23,14 @@ from mesa.datacollection import DataCollector # Data collection, to plot mean in
 from cell import Cell, CellState # Function that describes behaviour of single cells
 
 CS = CellState
-def getSt(s):
-    """Get an iterator of one and only one kind of state `s' out of the model `m'"""
-    def f(m):
-        return list(filter(lambda c: c.state == s, m.schedule.agents)) # must wrap in list which is dumb.
-    return f
-getI, getS = getSt(CS.INFECTED), getSt(CS.SUSCEPTIBLE)
-
-def fracN(g):
-    """Get the fraction of cells in `m' that fall under predicate `g'"""
-    def f(m):
-        return len(g(m)) / len(m.schedule.agents)
-    return f
-fracI, fracS = fracN(getI), fracN(getS)
+cs = lambda m: m.schedule.agents
+def fracN(s):
+    """Currying function that manufactures functions that calculate fraction of cells in a certain state `s' inside model `m'"""
+    return lambda m: len([c.state for c in cs(m) if c.state == s]) / len(cs(m))
+fracS, fracI = fracN(CS.SUSCEPTIBLE), fracN(CS.INFECTED)
 
 #Computes the mean infection duration in all infected individuals
-compute_mean_infduration = lambda m: mean(x.infection_duration for x in getI(m))
+compute_mean_infduration = lambda m: mean(c.infection_duration for c in cs(m) if c.state == CS.INFECTED)
 
 class SIRModel(Model):
     """Description of the model"""
