@@ -1,0 +1,3 @@
+# Ignore persitent undo information from PSJ's editor.
+*~undo-tree~
+__pycache__
