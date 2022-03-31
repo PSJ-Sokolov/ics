@@ -39,18 +39,6 @@ class Cell(Agent):
         self._nextinfduration = self.infduration
         self._nextstate = self.state
         
-        # Empty squares - potential reproduction of susceptibles
-        # No reproduction 
-        #if self.state == 0:
-        #   Susneighbors = 0
-        #   neis = self.model.grid.get_neighbors((self.x, self.y), moore=True, include_center=False)
-        #   for nei in neis:
-        #       if nei.state == self.Susceptible:
-        #            Susneighbors += 1
-        #    if Susneighbors > 0:
-        #        if random.random() < self.model.r*Susneighbors:
-        #            self._nextstate = self.Susceptible
-
         # Susceptibles - might die or get infected
         if self.state == self.Susceptible:
             # Natural death
@@ -80,19 +68,6 @@ class Cell(Agent):
                                 self._nextinf = nei.inf
                                 self._nextinfduration = nei.infduration
                                 break
-
-        # Infected - might die naturally or die after disease_duration
-        #Becomr R instead Empty
-        #elif self.state == self.Infected:
-        #    # Natural death or death by disease
-        #    if random.random() < self.model.d or self.timecounter > self.infduration:
-        #        self._nextstate = 0
-        #        self._nextinf = 0.0
-        #        self._nextinfduration = 0
-        #        self.timecounter = 0
-        #    # Else count how long it has been ill and apply potential mutations
-        #    else:
-        #        self.timecounter += 1
 
         elif self.state == self.Infected:
             # Natural death or death by disease
