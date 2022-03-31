@@ -31,7 +31,7 @@ class SIRModel(Model):
 
         self.grid     = SingleGrid(width, height, torus=True)
         self.schedule = SimultaneousActivation(self)
-        for (contents, x, y) in self.grid.coord_iter():
+        for (_, x, y) in self.grid.coord_iter():
             # Place randomly generated individuals
             cell = Cell((x,y), self)
             rand = random.random()
