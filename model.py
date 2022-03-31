@@ -48,7 +48,7 @@ class SIRModel(Model):
                 cell.infduration = self.infection_duration
                 cell.timecounter = random.randint(0, self.infection_duration)
             else:
-                cell.state = 0
+                cell.state = CellState.SUSCEPTIBLE
             self.grid.place_agent(cell, (x,y))
             self.schedule.add(cell)
 
