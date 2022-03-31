@@ -23,11 +23,11 @@ compute_mean_infduration = lambda m: mean(c.infection_duration for c in cs(m) if
 
 class SIRModel(Model):
     """Description of the model"""
-    def __init__(self, width, height):
+    def __init__(self, width, height, i = 2.0, dur = 5, hi = 10):
         # Set the model parameters
-        self.infectivity        = 2.0  # Infection strength per infected individual
-        self.infection_duration = 5    # Duration of infection
-        self.h_inf              = 10.  # Scaling of infectivity
+        self.infectivity        = i   # Infection strength per infected individual
+        self.infection_duration = dur # Duration of infection
+        self.h_inf              = hi  # Scaling of infectivity
 
         self.grid     = SingleGrid(width, height, torus=True)
         self.schedule = SimultaneousActivation(self)
