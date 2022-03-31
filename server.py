@@ -45,5 +45,5 @@ chart = ChartModule([{"Label": "S", "Color": "grey"},{"Label": "I", "Color": "re
 """ Launch the server that will run and display the model """
 server = ModularServer(SIRModel,
                        [grid, chart],
-                       "SI-model",
+                       "SIR-model",
                        {"width": gridwidth, "height": gridheight})
