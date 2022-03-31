@@ -1,5 +1,18 @@
 import random
-from statistics import mean
+#from statistics import mean
+def mean(data):
+    """Redefine mean to work on iterators"""
+    n    = 0
+    mean = 0.0
+
+    for x in data:
+        n += 1
+        mean += (x - mean)/n
+
+    if n < 1:
+        return float('nan')
+    else:
+        return mean
 
 from mesa import Model
 from mesa.time import SimultaneousActivation # updating scheme for synchronous updating
@@ -39,7 +52,7 @@ class SIRModel(Model):
 
         self.grid     = SingleGrid(width, height, torus=True)
         self.schedule = SimultaneousActivation(self)
-        for (_, x, y) in self.grid.coord_iter():
+        for (contents, x, y) in self.grid.coord_iter():
             # Place randomly generated individuals
             cell = Cell((x,y), self)
             rand = random.random()
