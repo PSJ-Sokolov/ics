@@ -48,26 +48,26 @@ class Cell(Agent):
             #    self._nextstate = 0
             # Infection?
             else:
-                neis = self.model.grid.get_neighbors((self.x, self.y), moore=True, include_center=False)
+                neighbors = self.model.grid.get_neighbors((self.x, self.y), moore=True, include_center=False)
                 tot_inf = 0.0
-                for nei in neis:
-                    if nei.state == self.Infected:
-                        tot_inf += nei.inf
+                for neighbor in neighbors:
+                    if neighbor.state == self.Infected:
+                        tot_inf += neighbor.inf
                 infprob = 0.0
                 if tot_inf > 0:
                     infprob = tot_inf / (tot_inf + self.model.h_inf)
                 if random.random() < infprob:
                     self._nextstate = self.Infected
-                    # Inherit infectivity of one infecting neighbour
+                    # Inherit infectivity of one infecting neighbor.
                     infprobsum = 0.0
                     rand = random.uniform(0, tot_inf)
-                    for nei in neis:
-                        if nei.state == CellState.SUSCEPTIBLE:
-                            infprobsum += nei.inf
+                    for neighbor in neighbors:
+                        if neighbor.state == CellState.SUSCEPTIBLE:
+                            infprobsum += neighbor.inf
                             if rand < infprobsum:
-                                # Inherit pathogen characteristics from infecting neighbour
-                                self._nextinf = nei.inf
-                                self._nextinfduration = nei.infduration
+                                # Inherit pathogen characteristics from infecting neighbor.
+                                self._nextinf = neighbor.inf
+                                self._nextinfduration = neighbor.infduration
                                 break
 
         elif self.state == CellState.SUSCEPTIBLE:
