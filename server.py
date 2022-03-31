@@ -18,12 +18,13 @@ COLORS = {
 def portrayCell(cell):
     """ Portrayal function: defines the portrayal of the cells """
     assert cell is not None
-    portrayal = {'Shape': 'rect',
-                 'w': 1,
-                 'h': 1,
-                 'Filled': 'true',
-                 'Layer': 1,
-                 'Color': 'white'} # Default colour, used for empty cells
+    portrayal = {
+        'Shape' : 'rect',
+        'w'     :  1    ,
+        'h'     :  1    ,
+        'Filled': 'true',
+        'Layer' :  1    ,
+    }
     DEBUG(f"Cell at {cell.x, cell.y} with state: {cell.state}")
     portrayal["Color"] = COLORS[cell.state]
     return portrayal
