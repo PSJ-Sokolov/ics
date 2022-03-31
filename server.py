@@ -1,5 +1,6 @@
 import logging
 logging.basicConfig(level=logging.DEBUG)
+DEBUG = logging.debug
 
 from cell import CellState
 
@@ -7,6 +8,12 @@ from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.modules import ChartModule
 from mesa.visualization.ModularVisualization import ModularServer
 from model import SIRModel
+
+COLORS = {
+    CellState.SUSCEPTIBLE : 'grey',
+    CellState.INFECTED    : 'red' ,
+    CellState.RECOVERED   : 'blue',
+}
 
 def portrayCell(cell):
     """ Portrayal function: defines the portrayal of the cells """
@@ -17,8 +24,8 @@ def portrayCell(cell):
                  'Filled': 'true',
                  'Layer': 1,
                  'Color': 'white'} # Default colour, used for empty cells
-    logging.debug(f"Cell at {cell.x, cell.y} with state: {cell.state}")
-    portrayal["Color"] = cell.state.value
+    DEBUG(f"Cell at {cell.x, cell.y} with state: {cell.state}")
+    portrayal["Color"] = COLORS[cell.state]
     return portrayal
 
 

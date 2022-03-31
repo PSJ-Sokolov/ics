@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, auto
 import random
 from mesa import Agent
 
@@ -6,12 +6,10 @@ class CellState(Enum):
     """An enum that determines the states that the cells in our CA can be in.
 
     Because we use a SIR model they can either be S -- SUSCEPTIBLE, I -- INFECTED, or R -- RECOVERED
-
-    We use the values to colour the cells later on (in server.py).
     """
-    SUSCEPTIBLE = "grey"
-    INFECTED    = "red"
-    RECOVERED   = "blue"
+    SUSCEPTIBLE = auto()
+    INFECTED    = auto()
+    RECOVERED   = auto()
 
 class Cell(Agent):
     """Description of the grid points of the CA"""
