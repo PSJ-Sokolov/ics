@@ -49,36 +49,49 @@ class Cell(Agent):
             neighbors = self.model.grid.get_neighbors((self.x, self.y), moore=True, include_center=False)
             # Summate total_infection for the current cell.
             total_infectivity = sum(neighbor.infectivity for neighbor in neighbors)
+            DEBUG(f'TOTAL INFECTIVITY IS {total_infectivity}')
 
             infprob = 0.0
             # This deals with the evolution of the disease.
             if total_infectivity > 0:
                 infprob = total_infectivity / (total_infectivity + self.model.h_inf)
+            # Take a random cell from the neigboring diseased cells to inherit the disease characteristics from.
+            # TODO Fix this, this should be able to be done more cleanly.
+            DEBUG(f'infprob IS {infprob}')
             if random.random() < infprob:
-                self._nextstate = self.Infected
+                DEBUG('RANDOMNESS DID TRIGGER IN THE STEP METHOD')
+                self._nextstate = CellState.INFECTED
                 # Inherit infectivity of one infecting neighbor.
-                infprobsum = 0.0
-                rand = random.uniform(0, total_infectivity)
+                infprobsum = 0.0                                  # A random value that gets bumped up as time goes on.
+                rand       = random.uniform(0, total_infectivity) # A random value that is uniformly distributed, it goes from zero to the total infectivity..
+                # Filter the cells that are diseased.
                 for neighbor in neighbors:
                     if neighbor.state == CellState.SUSCEPTIBLE:
-                        infprobsum += neighbor.inf
+                        # bump up the bump value by its susceptibility.
+                        infprobsum += neighbor.infectivity
+                        # if the cell has not randomly been infected yet by one of its neighbors the change of infection will rise.
                         if rand < infprobsum:
                             # Inherit pathogen characteristics from infecting neighbor.
                             self._nextinf = neighbor.inf
                             self._nextinfduration = neighbor.infduration
                             break
+            # This just amounts to taking one of the INFECTED neighbors of a
+            # SUSCEPTIBLE cell at random and inheriting its characteristics
+            # when becoming infected by it at random.
+
+            # Also somehow this part of the method does not seem to trigger?
 
         # If the cell was SUSCEPTIBLE and it was sick for long enough we will set it to "CellState.RECOVERED"
         elif self.state == CellState.INFECTED:
             # Cells will recover over time.
-            if  self.timecounter > self.infection_duration:
+            if  self.time > self.infection_duration:
                 self._nextstate       = CellState.RECOVERED
                 self._nextinf         = 0.0
                 self._nextinfduration = 0
-                self.timecounter      = 0
+                self.time             = 0
             # Else count how long it has been ill (and apply potential mutations *on next pass*)
             else:
-                self.timecounter += 1
+                self.time += 1
 
     def advance(self):
         """Set the current state to the new calculated internal state."""

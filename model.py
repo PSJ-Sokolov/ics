@@ -40,10 +40,10 @@ class SIRModel(Model):
             if rand < 0.1:
                 cell.state = CellState.SUSCEPTIBLE
             elif rand < 0.2:
-                cell.state       = CellState.INFECTED
-                cell.inf         = self.infectivity
-                cell.infduration = self.infection_duration
-                cell.timecounter = random.randint(0, self.infection_duration)
+                cell.state              = CellState.INFECTED
+                cell.infectivity        = self.infectivity
+                cell.infection_duration = self.infection_duration
+                cell.timecounter        = random.randint(0, self.infection_duration)
             else:
                 cell.state = CellState.SUSCEPTIBLE
             self.grid.place_agent(cell, (x,y))
