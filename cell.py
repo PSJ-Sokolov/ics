@@ -44,6 +44,7 @@ class Cell(Agent):
             # Natural death
             #if random.random() < self.model.d:
             if False:
+                pass
             #    self._nextstate = 0
             # Infection?
             else:
