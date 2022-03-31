@@ -63,10 +63,10 @@ class Cell(Agent):
                             break
 
         # If the cell was SUSCEPTIBLE and it was sick for long enough we will set it to "CellState.RECOVERED"
-        elif self.state == CellState.SUSCEPTIBLE:
+        elif self.state == CellState.INFECTED:
             # Cells will recover over time.
             if  self.timecounter > self.infection_duration:
-                self._nextstate       = self.Recovered
+                self._nextstate       = CellState.RECOVERED
                 self._nextinf         = 0.0
                 self._nextinfduration = 0
                 self.timecounter      = 0
