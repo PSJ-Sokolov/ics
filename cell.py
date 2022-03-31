@@ -75,11 +75,13 @@ class Cell(Agent):
                             self._nextinf = neighbor.inf
                             self._nextinfduration = neighbor.infduration
                             break
-            # This just amounts to taking one of the INFECTED neighbors of a
+            # This just seems (?) to amount to taking one of the INFECTED neighbors of a
             # SUSCEPTIBLE cell at random and inheriting its characteristics
             # when becoming infected by it at random.
 
-            # Also somehow this part of the method does not seem to trigger?
+            # TODO We can use something like:
+            # random.choices(neigbors, weights=(neighbors weighted by infectivity))
+            # to replace almost this whole part of the method. (I think?)
 
         # If the cell was SUSCEPTIBLE and it was sick for long enough we will set it to "CellState.RECOVERED"
         elif self.state == CellState.INFECTED:
