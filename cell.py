@@ -35,8 +35,8 @@ class Cell(Agent):
     def step(self):
         """Compute the next state of a cell"""
         # Assume cell is unchanged, unless something happens below
-        self._nextinf         = self.inf
-        self._nextinfduration = self.infduration
+        self._nextinf         = self.infectivity
+        self._nextinfduration = self.infection_duration
         self._nextstate       = self.state
 
         # Susceptibles - might die or get infected

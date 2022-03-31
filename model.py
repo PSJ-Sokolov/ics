@@ -20,7 +20,7 @@ def fracS(model):
 
 # Computes the fraction of cells filled with an I individual
 def fracI(model):
-    nI = len([cell.state for cell in model.schedule.agents if cell.state == cell.Infected])
+    nI = len([cell.state for cell in model.schedule.agents if cell.state == CellState.INFECTED])
     return nI / len(model.schedule.agents)
 
 class SIRModel(Model):
