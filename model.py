@@ -1,4 +1,5 @@
 import random
+from statistics import mean
 
 from mesa import Model
 from mesa.time import SimultaneousActivation # updating scheme for synchronous updating
@@ -8,24 +9,26 @@ from mesa.datacollection import DataCollector # Data collection, to plot mean in
 
 from cell import Cell, CellState # Function that describes behaviour of single cells
 
-# Computes the mean infection duration in all infected individuals
-def compute_mean_infduration(model):
-    infs = [cell.infduration for cell in model.schedule.agents if cell.state == CellState.INFECTED]
-    return sum(infs)/len(infs)
+CS = CellState
+def getSt(s):
+    """Get an iterator of one and only one kind of state `s' out of the model `m'"""
+    def f(m):
+        return list(filter(lambda c: c.state == s, m.schedule.agents)) # must wrap in list which is dumb.
+    return f
+getI, getS = getSt(CS.INFECTED), getSt(CS.SUSCEPTIBLE)
 
-# Computes the fraction of cells filled with an S individual
-def fracS(model):
-    nS = len([cell.state for cell in model.schedule.agents if cell.state == CellState.SUSCEPTIBLE])
-    return nS / len(model.schedule.agents)
+def fracN(g):
+    """Get the fraction of cells in `m' that fall under predicate `g'"""
+    def f(m):
+        return len(g(m)) / len(m.schedule.agents)
+    return f
+fracI, fracS = fracN(getI), fracN(getS)
 
-# Computes the fraction of cells filled with an I individual
-def fracI(model):
-    nI = len([cell.state for cell in model.schedule.agents if cell.state == CellState.INFECTED])
-    return nI / len(model.schedule.agents)
+#Computes the mean infection duration in all infected individuals
+compute_mean_infduration = lambda m: mean(x.infection_duration for x in getI(m))
 
 class SIRModel(Model):
     """Description of the model"""
-
     def __init__(self, width, height):
         # Set the model parameters
         self.infectivity        = 2.0  # Infection strength per infected individual
