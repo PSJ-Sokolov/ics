@@ -35,11 +35,11 @@ def portrayCell(cell):
     return portrayal
 
 """ Construct the simulation grid, all cells displayed as 5x5 squares """
-gridwidth = 100 # Change these parameters to change the grid size
+gridwidth  = 100 # Change these parameters to change the grid size
 gridheight = 100
 
 # Make a grid to plot the population dynamics
-grid = CanvasGrid(portrayCell, gridwidth, gridheight, 5*gridwidth, 5*gridheight)
+grid  = CanvasGrid(portrayCell, gridwidth, gridheight, 5*gridwidth, 5*gridheight)
 # Make a chart for plotting the density of individuals
 chart = ChartModule([{"Label": "S", "Color": "grey"},{"Label": "I", "Color": "red"}], data_collector_name="datacollector1")
 # Let chart plot the mean infection time
