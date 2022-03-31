@@ -27,8 +27,6 @@ class SIRModel(Model):
         # Set the model parameters
         self.infectivity        = 2.0  # Infection strength per infected individual
         self.infection_duration = 5    # Duration of infection
-        self.r                  = 0.04 # Reproduction rate per susceptible
-        self.d                  = 0.05 # Natural death rate
         self.h_inf              = 10.  # Scaling of infectivity
 
         self.grid     = SingleGrid(width, height, torus=True)
