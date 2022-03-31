@@ -6,16 +6,16 @@ from mesa.time import RandomActivation # for asynchronous updating
 from mesa.space import SingleGrid # spatial grid
 from mesa.datacollection import DataCollector # Data collection, to plot mean infectivity
 
-from cell import Cell # Function that describes behaviour of single cells
+from cell import Cell, CellState # Function that describes behaviour of single cells
 
 # Computes the mean infection duration in all infected individuals
 def compute_mean_infduration(model):
-    infs = [cell.infduration for cell in model.schedule.agents if cell.state == cell.Infected]
+    infs = [cell.infduration for cell in model.schedule.agents if cell.state == CellState.INFECTED]
     return sum(infs)/len(infs)
 
 # Computes the fraction of cells filled with an S individual
 def fracS(model):
-    nS = len([cell.state for cell in model.schedule.agents if cell.state == cell.Susceptible])
+    nS = len([cell.state for cell in model.schedule.agents if cell.state == CellState.SUSCEPTIBLE])
     return nS / len(model.schedule.agents)
 
 # Computes the fraction of cells filled with an I individual
@@ -25,7 +25,7 @@ def fracI(model):
 
 class SIRModel(Model):
     """Description of the model"""
-    
+
     def __init__(self, width, height):
         # Set the model parameters
         self.infectivity = 2.0      # Infection strength per infected individual
@@ -33,7 +33,7 @@ class SIRModel(Model):
         self.r = 0.04               # Reproduction rate per susceptible
         self.d = 0.05               # Natural death rate
         self.h_inf = 10.            # Scaling of infectivity
-       
+
         self.grid = SingleGrid(width, height, torus=True)
         self.schedule = SimultaneousActivation(self)
         for (contents, x, y) in self.grid.coord_iter():
@@ -41,9 +41,9 @@ class SIRModel(Model):
             cell = Cell((x,y), self)
             rand = random.random()
             if rand < 0.1:
-                cell.state = cell.Susceptible
+                cell.state = CellState.SUSCEPTIBLE
             elif rand < 0.2:
-                cell.state = cell.Infected
+                cell.state = CellState.INFECTED
                 cell.inf = self.infectivity
                 cell.infduration = self.infection_duration
                 cell.timecounter = random.randint(0, self.infection_duration)
@@ -57,11 +57,10 @@ class SIRModel(Model):
 
         # Add data collector, to plot the mean infection duration
         self.datacollector2 = DataCollector(model_reporters={"Mean_infduration": compute_mean_infduration})
-        
+
         self.running = True
 
     def step(self):
         self.datacollector1.collect(self)
         self.datacollector2.collect(self)
         self.schedule.step()
-    
