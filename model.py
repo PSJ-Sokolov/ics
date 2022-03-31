@@ -36,8 +36,6 @@ class SIRModel(Model):
             cell = Cell((x,y), self)
             rand = random.random()
             if rand < 0.1:
-                cell.state = CellState.SUSCEPTIBLE
-            elif rand < 0.2:
                 cell.state              = CellState.INFECTED
                 cell.infectivity        = self.infectivity
                 cell.infection_duration = self.infection_duration
