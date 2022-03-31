@@ -2,25 +2,25 @@ from enum import Enum
 import random
 from mesa import Agent
 
+class CellState(Enum):
+    """An enum that determines the states that the cells in our CA can be in.
+
+    Because we use a SIR model they can either be S -- SUSCEPTIBLE, I -- INFECTED, or R -- RECOVERED
+
+    We use the values to colour the cells later on (in server.py).
+    """
+    SUSCEPTIBLE = "grey"
+    INFECTED    = "red"
+    RECOVERED   = "blue"
+
 class Cell(Agent):
     """Description of the grid points of the CA"""
-    class CellState(Enum):
-        """An enum that determines the states that the cells in our CA can be in.
-
-        Because we use a SIR model they can either be S -- SUSCEPTIBLE, I -- INFECTED, or R -- RECOVERED
-
-        We use the values to colour the cells later on (in server.py).
-        """
-        SUSCEPTIBLE = "grey"
-        INFECTED    = "red"
-        RECOVERED   = "blue"
-
-    def __init__(self, position, model, initial_state = None):
+    def __init__(self, position, model, initial_state = CellState.SUSCEPTIBLE):
         """Create cell in given x,y position, with given initial state"""
         # Ceremony for the super class:
         super().__init__(positon,model)
         self.x,self.y           = pos
-        self.state              = init_state if init_state else self.CellState.SUSCEPTIBLE
+        self.state              = init_state
 
         # Ceremony for the framework:
         self._nextstate         = None
