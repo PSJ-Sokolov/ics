@@ -30,7 +30,7 @@ class Cell(Agent):
         # Stuff that is relevant to our model:
         self.time               = 0          # Duration infection
         self.infection_duration = 0
-        self.infection          = 0.0        # Infectivity
+        self.infectivity        = 0.0        # Infectivity
 
     def step(self):
         """Compute the next state of a cell"""
@@ -44,22 +44,17 @@ class Cell(Agent):
             # Get a list of the 8 surrounding neighbors of the current cell (cardinal and diagonal).
             neighbors = self.model.grid.get_neighbors((self.x, self.y), moore=True, include_center=False)
             # Summate total_infection for the current cell.
-            # TODO: fix this, using a loop to contsruct a new variable is an anti-patern,
-            #       should use listcomp or gen expr instead.
-            tot_inf = 0.0
-            for neighbor in neighbors:
-                if neighbor.state == self.Infected:
-                    tot_inf += neighbor.inf
-            infprob = 0.0
+            total_infectivity = sum(neighbor.infectivity for neighbor in neighbors)
 
+            infprob = 0.0
             # This deals with the evolution of the disease.
-            if tot_inf > 0:
-                infprob = tot_inf / (tot_inf + self.model.h_inf)
+            if total_infectivity > 0:
+                infprob = total_infectivity / (total_infectivity + self.model.h_inf)
             if random.random() < infprob:
                 self._nextstate = self.Infected
                 # Inherit infectivity of one infecting neighbor.
                 infprobsum = 0.0
-                rand = random.uniform(0, tot_inf)
+                rand = random.uniform(0, total_infectivity)
                 for neighbor in neighbors:
                     if neighbor.state == CellState.SUSCEPTIBLE:
                         infprobsum += neighbor.inf
