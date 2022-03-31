@@ -1,7 +1,7 @@
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.modules import ChartModule
 from mesa.visualization.ModularVisualization import ModularServer
-from model import SIModel
+from model import SIRModel
 
 ''' Portrayal function: defines the portrayal of the cells '''
 def portrayCell(cell):
@@ -36,7 +36,7 @@ chart = ChartModule([{"Label": "S", "Color": "grey"},{"Label": "I", "Color": "re
 
 
 ''' Launch the server that will run and display the model '''
-server = ModularServer(SIModel,
+server = ModularServer(SIRModel,
                        [grid, chart],
                        "SI-model",
                        {"width": gridwidth, "height": gridheight})

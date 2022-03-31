@@ -23,7 +23,7 @@ def fracI(model):
     nI = len([cell.state for cell in model.schedule.agents if cell.state == cell.Infected])
     return nI / len(model.schedule.agents)
 
-class SIModel(Model):
+class SIRModel(Model):
     """Description of the model"""
     
     def __init__(self, width, height):
