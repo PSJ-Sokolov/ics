@@ -1,4 +1,8 @@
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 from cell import CellState
+
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.modules import ChartModule
 from mesa.visualization.ModularVisualization import ModularServer
@@ -13,14 +17,8 @@ def portrayCell(cell):
                  "Filled": "true",
                  "Layer": 1,
                  "Color": "white"} # Default colour, used for empty cells
-    if cell.state == CellState.SUSCEPTIBLE:
-        portrayal["Color"] = "grey"
-    elif cell.state == CellState.INFECTED:
-        portrayal["Color"] = "red"
-    elif cell.state == CellState.RECOVERED:
-        portrayal["Color"] = "blue"
-
-
+    logging.debug(f'Cell at {cell.x, cell.y} with state: {cell.state}')
+    portrayal['Color'] = cell.state.value
     return portrayal
 
 
