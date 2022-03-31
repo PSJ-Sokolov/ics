@@ -2,11 +2,11 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 DEBUG = logging.debug
 
-from cell import CellState
-
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.modules import ChartModule
 from mesa.visualization.ModularVisualization import ModularServer
+
+from cell import CellState
 from model import SIRModel
 
 COLORS = {
