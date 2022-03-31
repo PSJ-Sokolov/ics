@@ -28,13 +28,13 @@ class SIRModel(Model):
 
     def __init__(self, width, height):
         # Set the model parameters
-        self.infectivity = 2.0      # Infection strength per infected individual
-        self.infection_duration = 5 # Duration of infection
-        self.r = 0.04               # Reproduction rate per susceptible
-        self.d = 0.05               # Natural death rate
-        self.h_inf = 10.            # Scaling of infectivity
+        self.infectivity        = 2.0  # Infection strength per infected individual
+        self.infection_duration = 5    # Duration of infection
+        self.r                  = 0.04 # Reproduction rate per susceptible
+        self.d                  = 0.05 # Natural death rate
+        self.h_inf              = 10.  # Scaling of infectivity
 
-        self.grid = SingleGrid(width, height, torus=True)
+        self.grid     = SingleGrid(width, height, torus=True)
         self.schedule = SimultaneousActivation(self)
         for (contents, x, y) in self.grid.coord_iter():
             # Place randomly generated individuals
@@ -43,8 +43,8 @@ class SIRModel(Model):
             if rand < 0.1:
                 cell.state = CellState.SUSCEPTIBLE
             elif rand < 0.2:
-                cell.state = CellState.INFECTED
-                cell.inf = self.infectivity
+                cell.state       = CellState.INFECTED
+                cell.inf         = self.infectivity
                 cell.infduration = self.infection_duration
                 cell.timecounter = random.randint(0, self.infection_duration)
             else:
