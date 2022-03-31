@@ -48,12 +48,18 @@ class Cell(Agent):
             #    self._nextstate = 0
             # Infection?
             else:
+                # Get a list of the 8 surrounding neighbors of the current cell (cardinal and diagonal).
                 neighbors = self.model.grid.get_neighbors((self.x, self.y), moore=True, include_center=False)
+                # Summate total_infection for the current cell.
+                # TODO: fix this, using a loop to contsruct a new variable is an anti-patern,
+                #       should use listcomp or gen expr instead.
                 tot_inf = 0.0
                 for neighbor in neighbors:
                     if neighbor.state == self.Infected:
                         tot_inf += neighbor.inf
                 infprob = 0.0
+
+                # This deals with the evolution of the disease.
                 if tot_inf > 0:
                     infprob = tot_inf / (tot_inf + self.model.h_inf)
                 if random.random() < infprob:
@@ -70,6 +76,7 @@ class Cell(Agent):
                                 self._nextinfduration = neighbor.infduration
                                 break
 
+        # If the cell was SUSCEPTIBLE and it was sick for long enough we consider it "RECOVERED"
         elif self.state == CellState.SUSCEPTIBLE:
             # Natural death or death by disease
             if  self.timecounter > self.infection_duration:
@@ -77,11 +84,12 @@ class Cell(Agent):
                 self._nextinf         = 0.0
                 self._nextinfduration = 0
                 self.timecounter      = 0
-            # Else count how long it has been ill and apply potential mutations
+            # Else count how long it has been ill (and apply potential mutations *on next pass*)
             else:
                 self.timecounter += 1
 
     def advance(self):
+        """Set the current state to the new calculated internal state."""
         self.state       = self._nextstate
         self.inf         = self._nextinf
         self.infduration = self._nextinfduration
