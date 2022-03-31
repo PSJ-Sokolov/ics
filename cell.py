@@ -50,32 +50,32 @@ class Cell(Agent):
         if self.state == self.Susceptible:
             # Natural death
             #if random.random() < self.model.d:
-            if False:
+            #if False:
             #    self._nextstate = 0
             # Infection?
-            else:
-                neis = self.model.grid.get_neighbors((self.x, self.y), moore=True, include_center=False)
-                tot_inf = 0.0
+            #else:
+            neis = self.model.grid.get_neighbors((self.x, self.y), moore=True, include_center=False)
+            tot_inf = 0.0
+            for nei in neis:
+                if nei.state == self.Infected:
+                    tot_inf += nei.inf
+            infprob = 0.0
+            if tot_inf > 0:
+                infprob = tot_inf / (tot_inf + self.model.h_inf)
+            if random.random() < infprob:
+                self._nextstate = self.Infected
+                # Inherit infectivity of one infecting neighbour
+                infprobsum = 0.0
+                rand = random.uniform(0, tot_inf)
                 for nei in neis:
                     if nei.state == self.Infected:
-                        tot_inf += nei.inf
-                infprob = 0.0
-                if tot_inf > 0:
-                    infprob = tot_inf / (tot_inf + self.model.h_inf)
-                if random.random() < infprob:
-                    self._nextstate = self.Infected
-                    # Inherit infectivity of one infecting neighbour
-                    infprobsum = 0.0
-                    rand = random.uniform(0, tot_inf)
-                    for nei in neis:
-                        if nei.state == self.Infected:
-                            infprobsum += nei.inf
-                            if rand < infprobsum:
-                                # Inherit pathogen characteristics from infecting neighbour
-                                self._nextinf = nei.inf
-                                self._nextinfduration = nei.infduration
-                                self._nextimmduration = nei.immduration
-                                break
+                        infprobsum += nei.inf
+                        if rand < infprobsum:
+                            # Inherit pathogen characteristics from infecting neighbour
+                            self._nextinf = nei.inf
+                            self._nextinfduration = nei.infduration
+                            self._nextimmduration = nei.immduration
+                            break
 
         # Infected - might die naturally or die after disease_duration
         #Becomr R instead Empty
