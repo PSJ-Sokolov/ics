@@ -1,18 +1,5 @@
 import random
-#from statistics import mean
-def mean(data):
-    """Redefine mean to work on iterators"""
-    n    = 0
-    mean = 0.0
-
-    for x in data:
-        n += 1
-        mean += (x - mean)/n
-
-    if n < 1:
-        return float('nan')
-    else:
-        return mean
+from statistics import mean
 
 from mesa import Model
 from mesa.time import SimultaneousActivation # updating scheme for synchronous updating
@@ -22,8 +9,7 @@ from mesa.datacollection import DataCollector # Data collection, to plot mean in
 
 from cell import Cell, CellState # Function that describes behaviour of single cells
 
-CS = CellState
-cs = lambda m: m.schedule.agents
+CS, cs = CellState, lambda m: m.schedule.agents
 def fracN(s):
     """Currying function that manufactures functions that calculate fraction of cells in a certain state `s' inside model `m'"""
     return lambda m: len([c.state for c in cs(m) if c.state == s]) / len(cs(m))
