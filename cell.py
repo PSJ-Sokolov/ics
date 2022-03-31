@@ -1,3 +1,8 @@
+import logging
+#logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.DEBUG)
+DEBUG = logging.debug
+
 from enum import Enum, auto
 import random
 from mesa import Agent
@@ -39,6 +44,7 @@ class Cell(Agent):
 
         # Susceptibles - might die or get infected
         if self.state == CellState.SUSCEPTIBLE:
+            DEBUG(f'SUS AT: {self.x,self.y} IN{self}')
             # Get a list of the 8 surrounding neighbors of the current cell (cardinal and diagonal).
             neighbors = self.model.grid.get_neighbors((self.x, self.y), moore=True, include_center=False)
             # Summate total_infection for the current cell.
