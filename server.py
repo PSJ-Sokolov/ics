@@ -1,5 +1,5 @@
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 DEBUG = logging.debug
 
 from mesa.visualization.modules import CanvasGrid
