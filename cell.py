@@ -40,7 +40,7 @@ class Cell(Agent):
         self._nextstate = self.state
 
         # Susceptibles - might die or get infected
-        if self.state == self.Susceptible:
+        if self.state == CellState.SUSCEPTIBLE:
             # Natural death
             #if random.random() < self.model.d:
             if False:
@@ -62,7 +62,7 @@ class Cell(Agent):
                     infprobsum = 0.0
                     rand = random.uniform(0, tot_inf)
                     for nei in neis:
-                        if nei.state == self.Infected:
+                        if nei.state == CellState.SUSCEPTIBLE:
                             infprobsum += nei.inf
                             if rand < infprobsum:
                                 # Inherit pathogen characteristics from infecting neighbour
@@ -70,7 +70,7 @@ class Cell(Agent):
                                 self._nextinfduration = nei.infduration
                                 break
 
-        elif self.state == self.Infected:
+        elif self.state == CellState.SUSCEPTIBLE:
             # Natural death or death by disease
             if  self.timecounter > self.infduration:
                 self._nextstate = self.Recovered
