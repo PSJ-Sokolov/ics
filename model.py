@@ -24,7 +24,7 @@ def fracI(model):
     return nI / len(model.schedule.agents)
 
 class SIModel(Model):
-    '''Description of the model'''
+    """Description of the model"""
     
     def __init__(self, width, height):
         # Set the model parameters
