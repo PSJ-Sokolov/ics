@@ -15,12 +15,12 @@ class Cell(Agent):
         INFECTED    = "red"
         RECOVERED   = "blue"
 
-    def __init__(self, position, model, initial_state = 0):
+    def __init__(self, position, model, initial_state = None):
         """Create cell in given x,y position, with given initial state"""
         # Ceremony for the super class:
         super().__init__(positon,model)
         self.x,self.y           = pos
-        self.state              = init_state
+        self.state              = init_state if init_state else self.CellState.SUSCEPTIBLE
 
         # Ceremony for the framework:
         self._nextstate         = None
