@@ -10,7 +10,7 @@ from mesa.visualization.ModularVisualization import ModularServer
 from model import SIRModel
 
 COLORS = {
-    CellState.SUSCEPTIBLE : 'grey',
+    CellState.SUSCEPTIBLE : 'white',
     CellState.INFECTED    : 'red' ,
     CellState.RECOVERED   : 'blue',
 }
