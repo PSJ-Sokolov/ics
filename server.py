@@ -37,6 +37,7 @@ gridheight = 100
 # Make a grid to plot the population dynamics
 grid  = CanvasGrid(portrayCell, gridwidth, gridheight, 5*gridwidth, 5*gridheight)
 # Make a chart for plotting the density of individuals
+# TODO turn this into a stacked graph (if MESA supports this)
 chartSIR = ChartModule([
     {'Label': 'S', 'Color': 'grey'},
     {'Label': 'I', 'Color': COLORS[CellState.INFECTED]},
