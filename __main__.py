@@ -16,10 +16,11 @@ if __name__ == '__main__':
     logging.info(args)
 
     try:
-        server      = makeServer(args.i, args.d, args.r)
-        # server.port = 8521 # Default port
+        server = makeServer(args.i, args.d, args.r)
         server.launch()
     except statistics.StatisticsError:
         print("THERE ARE NO MORE INFECTED CELLS")
     finally:
         print("TERMINATING!")
+else:
+    server = makeServer()
