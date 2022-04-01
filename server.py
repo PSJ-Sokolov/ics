@@ -8,7 +8,7 @@ from mesa.visualization.ModularVisualization import ModularServer
 
 # USER INCLUDE:
 from cell  import CellState
-from model import SIRModel
+from model import ModelFactory
 
 # USER CONFIG:
 logging.basicConfig(level=logging.WARNING)
@@ -45,9 +45,7 @@ chart = ChartModule([{"Label": "S", "Color": "grey"},{"Label": "I", "Color": "re
 # Let chart plot the mean infection time
 #chart = ChartModule([{"Label": "Mean_infduration", "Color": "Black"}], data_collector_name="datacollector2")
 
-
-""" Launch the server that will run and display the model """
-server = ModularServer(SIRModel,
-                       [grid, chart],
-                       "SIR-model",
-                       {"width": gridwidth, "height": gridheight})
+def makeServer(i = 2.0, di = 5, hi = 10):
+    """ Launch the server that will run and display the model """
+    SIRModel = ModelFactory(i, di, hi)
+    return ModularServer(SIRModel, [grid, chart], "SIR-model", {"width": gridwidth, "height": gridheight})

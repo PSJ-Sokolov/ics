@@ -21,39 +21,41 @@ fracS, fracI = fracN(CS.SUSCEPTIBLE), fracN(CS.INFECTED)
 #Computes the mean infection duration in all infected individuals
 compute_mean_infduration = lambda m: mean(c.infection_duration for c in cs(m) if c.state == CS.INFECTED)
 
-class SIRModel(Model):
-    """Description of the model"""
-    def __init__(self, width, height, i = 2.0, dur = 5, hi = 10):
-        # Set the model parameters
-        self.infectivity        = i   # Infection strength per infected individual
-        self.infection_duration = dur # Duration of infection
-        self.h_inf              = hi  # Scaling of infectivity
+def ModelFactory(i = 2.0, di = 5, hi = 10):
+    class SIRModel(Model):
+        """Description of the model"""
+        def __init__(self, width, height):
+            # Set the model parameters
+            self.infectivity        = i   # Infection strength per infected individual
+            self.infection_duration = di # Duration of infection
+            self.h_inf              = hi  # Scaling of infectivity
 
-        self.grid     = SingleGrid(width, height, torus=True)
-        self.schedule = SimultaneousActivation(self)
-        for (_, x, y) in self.grid.coord_iter():
-            # Place randomly generated individuals
-            cell = Cell((x,y), self)
-            rand = random.random()
-            if rand < 0.1:
-                cell.state              = CellState.INFECTED
-                cell.infectivity        = self.infectivity
-                cell.infection_duration = self.infection_duration
-                cell.time               = random.randint(0, self.infection_duration)
-            else:
-                cell.state = CellState.SUSCEPTIBLE
-            self.grid.place_agent(cell, (x,y))
-            self.schedule.add(cell)
+            self.grid     = SingleGrid(width, height, torus=True)
+            self.schedule = SimultaneousActivation(self)
+            for (_, x, y) in self.grid.coord_iter():
+                # Place randomly generated individuals
+                cell = Cell((x,y), self)
+                rand = random.random()
+                if rand < 0.1:
+                    cell.state              = CellState.INFECTED
+                    cell.infectivity        = self.infectivity
+                    cell.infection_duration = self.infection_duration
+                    cell.time               = random.randint(0, self.infection_duration)
+                else:
+                    cell.state = CellState.SUSCEPTIBLE
+                self.grid.place_agent(cell, (x,y))
+                self.schedule.add(cell)
 
-        # Add data collector, to plot the number of individuals of different types
-        self.datacollector1 = DataCollector(model_reporters={"S": fracS, "I": fracI})
+            # Add data collector, to plot the number of individuals of different types
+            self.datacollector1 = DataCollector(model_reporters={"S": fracS, "I": fracI})
 
-        # Add data collector, to plot the mean infection duration
-        self.datacollector2 = DataCollector(model_reporters={"Mean_infduration": compute_mean_infduration})
+            # Add data collector, to plot the mean infection duration
+            self.datacollector2 = DataCollector(model_reporters={"Mean_infduration": compute_mean_infduration})
 
-        self.running = True
+            self.running = True
 
-    def step(self):
-        self.datacollector1.collect(self)
-        self.datacollector2.collect(self)
-        self.schedule.step()
+        def step(self):
+            self.datacollector1.collect(self)
+            self.datacollector2.collect(self)
+            self.schedule.step()
+    return SIRModel
