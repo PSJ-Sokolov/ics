@@ -37,15 +37,15 @@ gridheight = 100
 # Make a grid to plot the population dynamics
 grid  = CanvasGrid(portrayCell, gridwidth, gridheight, 5*gridwidth, 5*gridheight)
 # Make a chart for plotting the density of individuals
-chart = ChartModule([
+chartSIR = ChartModule([
     {'Label': 'S', 'Color': 'grey'},
     {'Label': 'I', 'Color': COLORS[CellState.INFECTED]},
     {'Label': 'R', 'Color': COLORS[CellState.RECOVERED]},
     ], data_collector_name='datacollector1')
 # Let chart plot the mean infection time
-#chart = ChartModule([{"Label": "Mean_infduration", "Color": "Black"}], data_collector_name="datacollector2")
+chartMI = ChartModule([{"Label": "Mean_infduration", "Color": "Black"}], data_collector_name="datacollector2")
 
 def makeServer(i = 2.0, di = 5, hi = 10):
     """ Launch the server that will run and display the model """
     SIRModel = ModelFactory(i, di, hi)
-    return ModularServer(SIRModel, [grid, chart], "SIR-model", {"width": gridwidth, "height": gridheight})
+    return ModularServer(SIRModel, [grid, chartSIR, chartMI], "SIR-model", {"width": gridwidth, "height": gridheight})

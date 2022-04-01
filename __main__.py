@@ -1,6 +1,7 @@
-from server import makeServer
-
 import logging
+import statistics
+
+from server import makeServer
 
 if __name__ == '__main__':
     import argparse
@@ -14,6 +15,7 @@ if __name__ == '__main__':
     #logging.basicConfig(level=logging.WARNING)
     logging.info(args)
 
-    server      = makeServer(args.i, args.d, args.r)
-    server.port = 8521 # Default port
-    server.launch()
+    try:
+        server      = makeServer(args.i, args.d, args.r)
+        server.port = 8521 # Default port
+        server.launch()
