@@ -16,6 +16,7 @@ if __name__ == '__main__':
     #logging.basicConfig(level=logging.WARNING)
     logging.info(args)
 
+    # TODO this dirty trick sadly did not work: find another way or abandon.
     try:
         server = makeServer(args.i, args.d, args.r)
         server.launch()
