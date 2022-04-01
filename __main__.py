@@ -17,5 +17,9 @@ if __name__ == '__main__':
 
     try:
         server      = makeServer(args.i, args.d, args.r)
-        server.port = 8521 # Default port
+        # server.port = 8521 # Default port
         server.launch()
+    except statistics.StatisticsError:
+        print("THERE ARE NO MORE INFECTED CELLS")
+    finally:
+        print("TERMINATING!")

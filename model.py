@@ -25,13 +25,17 @@ def ModelFactory(i = 2.0, di = 5, hi = 10):
     class SIRModel(Model):
         """Description of the model"""
         def __init__(self, width, height):
-            # Set the model parameters
+            # Set the model parameters:
             self.infectivity        = i   # Infection strength per infected individual
             self.infection_duration = di # Duration of infection
             self.h_inf              = hi  # Scaling of infectivity
 
+            # Initialize components:
             self.grid     = SingleGrid(width, height, torus=True)
             self.schedule = SimultaneousActivation(self)
+            self.running  = True
+
+            # Seed the board with infected cells randomly:
             for (_, x, y) in self.grid.coord_iter():
                 # Place randomly generated individuals
                 cell = Cell((x,y), self)
@@ -45,14 +49,13 @@ def ModelFactory(i = 2.0, di = 5, hi = 10):
                     cell.state = CellState.SUSCEPTIBLE
                 self.grid.place_agent(cell, (x,y))
                 self.schedule.add(cell)
+            # TODO This should be done shorter.
 
             # Add data collector, to plot the number of individuals of different types
             self.datacollector1 = DataCollector(model_reporters={'S': fracS, 'I': fracI, 'R': fracR})
 
             # Add data collector, to plot the mean infection duration
             self.datacollector2 = DataCollector(model_reporters={"Mean_infduration": compute_mean_infduration})
-
-            self.running = True
 
         def step(self):
             self.datacollector1.collect(self)
