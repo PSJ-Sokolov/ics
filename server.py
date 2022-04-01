@@ -37,7 +37,11 @@ gridheight = 100
 # Make a grid to plot the population dynamics
 grid  = CanvasGrid(portrayCell, gridwidth, gridheight, 5*gridwidth, 5*gridheight)
 # Make a chart for plotting the density of individuals
-chart = ChartModule([{"Label": "S", "Color": "grey"},{"Label": "I", "Color": "red"}], data_collector_name="datacollector1")
+chart = ChartModule([
+    {'Label': 'S', 'Color': 'grey'},
+    {'Label': 'I', 'Color': COLORS[CellState.INFECTED]},
+    {'Label': 'R', 'Color': COLORS[CellState.RECOVERED]},
+    ], data_collector_name='datacollector1')
 # Let chart plot the mean infection time
 #chart = ChartModule([{"Label": "Mean_infduration", "Color": "Black"}], data_collector_name="datacollector2")
 
