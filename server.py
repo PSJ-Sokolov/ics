@@ -10,10 +10,6 @@ from mesa.visualization.ModularVisualization import ModularServer
 from cell  import CellState
 from model import ModelFactory
 
-# USER CONFIG:
-logging.basicConfig(level=logging.WARNING)
-DEBUG = logging.debug
-
 COLORS = {
     CellState.SUSCEPTIBLE : 'white',
     CellState.INFECTED    : 'red' ,
@@ -30,7 +26,7 @@ def portrayCell(cell):
         'Filled': 'true',
         'Layer' :  1    ,
     }
-    DEBUG(f"Cell at {cell.x, cell.y} with state: {cell.state}")
+    logging.debug(f"Cell at {cell.x, cell.y} with state: {cell.state}")
     portrayal["Color"] = COLORS[cell.state]
     return portrayal
 
