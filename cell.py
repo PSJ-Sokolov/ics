@@ -99,7 +99,13 @@ class Cell(Agent):
                 self.timecounter = 0
             # Else count how long it has been ill and apply potential mutations     #Mutation should be add here
             else:
-                self.timecounter += 1        
+                self.timecounter += 1
+                mu=random.random()
+                if mu<0.1:
+                    self._nextinfduration += 1          #Mutation to more infectivity duration
+                elif mu<0.2:
+                    if self._nextinfduration>1:
+                        self._nextinfduration -= 1      #Mutation to less infectivity duration
                 
         # Recovered - lose immunity after immunity_duration
         elif self.state == self.Recovered:
