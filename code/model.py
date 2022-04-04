@@ -4,7 +4,7 @@ from statistics import mean
 
 # MESA:
 from mesa import Model
-from mesa.datacollection import DataCollector  # Data collection, to plot mean infectivity
+from mesa.datacollection import DataCollector  # Data collection, to plot mean infectiousness
 from mesa.space import SingleGrid  # spatial grid
 from mesa.time import RandomActivation  # for asynchronous updating
 from mesa.time import SimultaneousActivation  # updating scheme for synchronous updating
@@ -29,9 +29,9 @@ def model_factory(i=2.0, di=5, hi=10):
 
         def __init__(self, width, height):
             # Set the model parameters:
-            self.infectivity = i  # Infection strength per infected individual
+            self.infectiousness = i  # Infection strength per infected individual
             self.infection_duration = di  # Duration of infection
-            self.h_inf = hi  # Scaling of infectivity
+            self.h_inf = hi  # Scaling of infectiousness
 
             # Initialize components:
             self.grid = SingleGrid(width, height, torus=True)
@@ -45,7 +45,7 @@ def model_factory(i=2.0, di=5, hi=10):
                 rand = random.random()
                 if rand < 0.1:
                     cell.state = CellState.INFECTED
-                    cell.infectivity = self.infectivity
+                    cell.infectiousness = self.infectiousness
                     cell.infection_duration = self.infection_duration
                     cell.time = random.randint(0, self.infection_duration)
                 else:
