@@ -13,7 +13,7 @@ from model import model_factory
 COLORS = {
     CellState.SUSCEPTIBLE: 'white',
     CellState.INFECTED: 'red',
-    CellState.RECOVERED: 'blue',
+    CellState.RESISTANT: 'blue',
 }
 
 
@@ -43,7 +43,7 @@ grid = CanvasGrid(portray_cell, grid_Width, grid_Height, 5 * grid_Width, 5 * gri
 chartSIR = ChartModule([
     {'Label': 'S', 'Color': 'grey'},
     {'Label': 'I', 'Color': COLORS[CellState.INFECTED]},
-    {'Label': 'R', 'Color': COLORS[CellState.RECOVERED]},
+    {'Label': 'R', 'Color': COLORS[CellState.RESISTANT]},
 ], data_collector_name='dataCollector1')
 # Let chart plot the mean infection time
 chartMI = ChartModule([{"Label": "Mean_infection_duration", "Color": "Black"}], data_collector_name="dataCollector2")

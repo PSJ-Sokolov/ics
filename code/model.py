@@ -12,15 +12,15 @@ from mesa.time import SimultaneousActivation  # updating scheme for synchronous 
 # USER IMPORT:
 from cell import Cell, CellState  # Function that describes behaviour of single cells
 
+# The next bit uses some functional programming techniques (Haskell, LISP) such as partial application and currying.
 CS, cs = CellState, lambda m: m.schedule.agents
 def fracN(s):
     """Currying function that manufactures functions that calculate fraction of cells in a certain state `s' inside
     model `m' """
     return lambda m: len([c.state for c in cs(m) if c.state == s]) / len(cs(m))
-fracS, fracI, fracR = fracN(CS.SUSCEPTIBLE), fracN(CS.INFECTED), fracN(CS.RECOVERED)
-
+fracS, fracI, fracR = fracN(CS.SUSCEPTIBLE), fracN(CS.INFECTED), fracN(CS.RESISTANT)
 # Computes the mean infection duration in all infected individuals
-compute_mean_infduration = lambda m: mean(c.infection_duration for c in cs(m) if c.state == CS.INFECTED)
+compute_mean_infection_duration = lambda m: mean(c.infection_duration for c in cs(m) if c.state == CS.INFECTED)
 
 
 def model_factory(i=2.0, di=5, hi=10):
@@ -58,7 +58,7 @@ def model_factory(i=2.0, di=5, hi=10):
             self.dataCollector1 = DataCollector(model_reporters={'S': fracS, 'I': fracI, 'R': fracR})
 
             # Add data collector, to plot the mean infection duration
-            self.dataCollector2 = DataCollector(model_reporters={"Mean_infection_duration": compute_mean_infduration})
+            self.dataCollector2 = DataCollector(model_reporters={"Mean_infection_duration": compute_mean_infection_duration})
 
         def step(self):
             self.dataCollector1.collect(self)
