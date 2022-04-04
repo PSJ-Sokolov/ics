@@ -77,6 +77,7 @@ class Cell(Agent):
 
             # TODO We can use something like:
             # random.choices(neigbors, weights=(neighbors weighted by infectivity))
+            # Infectiousness
             # to replace almost this whole part of the method. (I think?)
 
         # If the cell was SUSCEPTIBLE and it was sick for long enough we will set it to "CellState.RECOVERED"
@@ -94,5 +95,5 @@ class Cell(Agent):
     def advance(self):
         """Set the current state to the new calculated internal state."""
         self.state       = self._nextstate
-        self.inf         = self._nextinf
-        self.infduration = self._nextinfduration
+        self.infectivity        = self._nextinf
+        self.infection_duration = self._nextinfduration
