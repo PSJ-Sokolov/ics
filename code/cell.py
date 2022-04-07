@@ -122,13 +122,20 @@ class Cell(Agent):
             self.nxt.state = CellState.RESISTANT
             self.nxt.infectiousness = 0.0
             self.nxt.infection_duration = 0
-            self.now.tick = 0
+            self.nxt.tick = 0
         # Else count how long it has been ill (and apply potential mutations *on next pass*)
         else:
             self.now.tick += 1
 
     def transfer_state_r_to_s(self):
-        pass
+        if self.now.tick > self.now.resistance_duration:
+            self.nxt.state = CellState.SUSCEPTIBLE
+            self.nxt.infectiousness =0.0
+            self.nxt.infection_duration = 0
+            self.nxt.resistance_duration = 0
+            self.nxt.tick = 0
+        else:
+            self.now.tick += 1
 
     def advance(self):
         """Set the now state to the new calculated internal state."""
