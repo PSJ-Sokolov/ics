@@ -5,7 +5,6 @@ from enum import Enum, auto
 from mesa import Agent
 from dataclasses import dataclass
 import typing
-# import annotations
 
 class CellState(Enum):
     """An enum that determines the states that the cells in our CA can be in.
@@ -20,9 +19,9 @@ class CellState(Enum):
 @dataclass
 class MutableData():
     state: CellState = CellState.SUSCEPTIBLE  # State of cell of CA = SUS | INF | RES
-    infectiousness: float = 2.0  # Infection strength per infected individual
-    infection_duration: int = 5  # Duration of infection
-    resistance_duration: int = 5  # Duration of resistance
+    infectiousness: float = 0.0  # Infection strength per infected individual
+    infection_duration: int = 0  # Duration of infection
+    resistance_duration: int = 0  # Duration of resistance
     tick: int = 0  # Current tick the cell is on.
 
 
@@ -31,23 +30,11 @@ class Cell(Agent):
 
     def __init__(self, position, model, initial_state=CellState.SUSCEPTIBLE):
         """Create cell in given x,y position, with given initial state"""
-        # Ceremony for the super class:
         super().__init__(position, model)
         self.position = position
-        # self.now.state = initial_state
-
         self.now = MutableData(initial_state)
-        self.nxt   = MutableData()
+        self.nxt = MutableData()
 
-        # Ceremony for the framework:
-        # self._next_state = None
-        # self.nxt.infectiousness = None
-        # self.nxt.infection_duration = None
-
-        # Stuff that is relevant to our model:
-        # self.now.tick = 0  # Duration infection
-        # self.now.infection_duration = 0
-        # self.now.infectiousness = 0.0  # infectiousness
 
     def get_neighbors(self) -> list['Cell']:
         """ Get a list of the 8 surrounding neighbors of the now cell (
@@ -57,8 +44,7 @@ class Cell(Agent):
 
     def step(self):
         """Compute the next state of a cell"""
-        # Ordinary case: Just update
-        self.nxt = self.now
+        self.nxt = self.now # Ordinary case: Just update
 
         if self.now.state == CellState.SUSCEPTIBLE:
             self.transfer_state_s_to_i()
@@ -114,32 +100,17 @@ class Cell(Agent):
         # to replace almost this whole part of the method. (I think?)
 
     def transfer_state_i_to_r(self):
-        # Cells will recover over time.
-        logging.debug('OUTER TRIGGER')
         if self.now.tick > self.now.infection_duration:
-            logging.debug('INNER TRIGGER f{self.now.tick, self.now.infection_duration}')
-            # If the cell was SUSCEPTIBLE and it was sick for long enough we will set it to "CellState.RESISTANT"
-            self.nxt.state = CellState.RESISTANT
-            self.nxt.infectiousness = 0.0
-            self.nxt.infection_duration = 0
-            self.nxt.tick = 0
-        # Else count how long it has been ill (and apply potential mutations *on next pass*)
+            self.nxt = MutableData(CellState.RESISTANT)
         else:
             self.now.tick += 1
 
     def transfer_state_r_to_s(self):
         if self.now.tick > self.now.resistance_duration:
-            self.nxt.state = CellState.SUSCEPTIBLE
-            self.nxt.infectiousness =0.0
-            self.nxt.infection_duration = 0
-            self.nxt.resistance_duration = 0
-            self.nxt.tick = 0
+            self.nxt = MutableData(CellState.SUSCEPTIBLE)
         else:
             self.now.tick += 1
 
     def advance(self):
         """Set the now state to the new calculated internal state."""
-        # self.now.state = self._next_state
-        # self.now.infectiousness = self.nxt.infectiousness
-        # self.now.infection_duration = self.nxt.infection_duration
         self.now = self.nxt
