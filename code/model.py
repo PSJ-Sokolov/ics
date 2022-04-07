@@ -17,10 +17,10 @@ CS, cs = CellState, lambda m: m.schedule.agents
 def fracN(s):
     """Currying function that manufactures functions that calculate fraction of cells in a certain state `s' inside
     model `m' """
-    return lambda m: len([c.state for c in cs(m) if c.state == s]) / len(cs(m))
+    return lambda m: len([c.now.state for c in cs(m) if c.now.state == s]) / len(cs(m))
 fracS, fracI, fracR = fracN(CS.SUSCEPTIBLE), fracN(CS.INFECTED), fracN(CS.RESISTANT)
 # Computes the mean infection duration in all infected individuals
-compute_mean_infection_duration = lambda m: mean(c.infection_duration for c in cs(m) if c.state == CS.INFECTED)
+compute_mean_infection_duration = lambda m: mean(c.now.infection_duration for c in cs(m) if c.now.state == CS.INFECTED)
 
 
 def model_factory(i=2.0, di=5, hi=10):
@@ -44,12 +44,12 @@ def model_factory(i=2.0, di=5, hi=10):
                 cell = Cell((x, y), self)
                 rand = random.random()
                 if rand < 0.1:
-                    cell.state = CellState.INFECTED
-                    cell.infectiousness = self.infectiousness
-                    cell.infection_duration = self.infection_duration
-                    cell.time = random.randint(0, self.infection_duration)
+                    cell.now.state = CellState.INFECTED
+                    cell.now.infectiousness = self.infectiousness
+                    cell.now.infection_duration = self.infection_duration
+                    cell.now.tick = random.randint(0, self.infection_duration)
                 else:
-                    cell.state = CellState.SUSCEPTIBLE
+                    cell.now.state = CellState.SUSCEPTIBLE
                 self.grid.place_agent(cell, (x, y))
                 self.schedule.add(cell)
             # TODO This should be done shorter.

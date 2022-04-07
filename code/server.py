@@ -1,4 +1,5 @@
 # STD INCLUDE:
+from __future__ import annotations
 import logging
 
 # MESA INCLUDE:
@@ -7,7 +8,7 @@ from mesa.visualization.modules import ChartModule
 from mesa.visualization.ModularVisualization import ModularServer
 
 # USER INCLUDE:
-from cell import CellState
+from cell import CellState, Cell
 from model import model_factory
 
 COLORS = {
@@ -17,7 +18,7 @@ COLORS = {
 }
 
 
-def portray_cell(cell):
+def portray_cell(cell: Cell):
     """ Portrayal function: defines the portrayal of the cells """
     assert cell is not None
     portrayal = {
@@ -27,8 +28,8 @@ def portray_cell(cell):
         'Filled': 'true',
         'Layer': 1,
     }
-    logging.debug(f"Cell at {cell.x, cell.y} with state: {cell.state}")
-    portrayal["Color"] = COLORS[cell.state]
+    logging.debug(f"Cell at {cell.position} with state: {cell.now.state}")
+    portrayal["Color"] = COLORS[cell.now.state]
     return portrayal
 
 
