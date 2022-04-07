@@ -57,72 +57,78 @@ class Cell(Agent):
 
     def step(self):
         """Compute the next state of a cell"""
-        # Assume cell is unchanged, unless something happens below
-        # self.nxt.infectiousness = self.now.infectiousness
-        # self.nxt.infection_duration = self.now.infection_duration
-        # self._next_state = self.now.state
+        # Ordinary case: Just update
         self.nxt = self.now
 
-        # Susceptibles - might die or get infected
         if self.now.state == CellState.SUSCEPTIBLE:
-            logging.debug(f'SUS AT: {self.position} IN{self}')
-            neighbors : list[Cell] = self.get_neighbors()
-            logging.debug(f'NEIGBOURS: {neighbors}')
-            # Sum total_infection for the now cell.
-            total_infectiousness = sum(
-                n.now.infectiousness for n in neighbors)
-            logging.debug(f'TOTAL INFECTIOUSNESS IS {total_infectiousness}')
-
-            infection_probability = 0.0
-            # This deals with the evolution of the disease.
-            if total_infectiousness > 0:
-                infection_probability = total_infectiousness / (
-                            total_infectiousness + self.model.h_inf)
-            # Take a random cell from the neighboring diseased cells to inherit the disease characteristics from.
-            # TODO Fix this, this should be able to be done more cleanly.
-            logging.debug(f'infection_probability IS {infection_probability}')
-            if random.random() < infection_probability:
-                logging.debug('RANDOMNESS DID TRIGGER IN THE STEP METHOD')
-                self.nxt.state = CellState.INFECTED
-                # Inherit infectiousness of one infecting neighbor.now.
-                infection_probability_sum = 0.0  # A random value that gets bumped up as time goes on.
-                rand = random.uniform(0,
-                                      total_infectiousness)  # A random value that is uniformly distributed,
-                # it goes from zero to the total infectiousness..
-                # Filter the cells that are diseased.
-                for neighbor in neighbors:
-                    if neighbor.now.state == CellState.SUSCEPTIBLE:
-                        # bump up the bump value by its susceptibility.
-                        infection_probability_sum += neighbor.now.infectiousness
-                        # if the cell has not randomly been infected yet by one of its neighbors the change of
-                        # infection will rise.
-                        if rand < infection_probability_sum:
-                            # Inherit pathogen characteristics from infecting neighbor.now.
-                            self.nxt.infectiousness = neighbor.now.infectiousness
-                            self.nxt.infection_duration = neighbor.now.infection_duration
-                            break
-            # This just seems (?) to amount to taking one of the INFECTED neighbors of a
-            # SUSCEPTIBLE cell at random and inheriting its characteristics
-            # when becoming infected by it at random.
-
-            # TODO We can use something like:
-            # random.choices(neighbors, weights=(neighbors weighted by infectiousness))
-            # Infectiousness
-            # to replace almost this whole part of the method. (I think?)
-
-        # If the cell was SUSCEPTIBLE and it was sick for long enough we will set it to "CellState.RESISTANT"
+            self.transfer_state_s_to_i()
         elif self.now.state == CellState.INFECTED:
-            # Cells will recover over time.
-            logging.debug('OUTER TRIGGER')
-            if self.now.tick > self.now.infection_duration:
-                logging.debug('INNER TRIGGER f{self.now.tick, self.now.infection_duration}')
-                self.nxt.state = CellState.RESISTANT
-                self.nxt.infectiousness = 0.0
-                self.nxt.infection_duration = 0
-                self.now.tick = 0
-            # Else count how long it has been ill (and apply potential mutations *on next pass*)
-            else:
-                self.now.tick += 1
+            self.transfer_state_i_to_r()
+        elif self.now.state == CellState.RESISTANT:
+            self.transfer_state_r_to_s()
+
+    def transfer_state_s_to_i(self):
+        logging.debug(f'SUS AT: {self.position} IN{self}')
+        neighbors : list[Cell] = self.get_neighbors()
+        logging.debug(f'NEIGBOURS: {neighbors}')
+        # Sum total_infection for the now cell.
+        total_infectiousness = sum(
+            n.now.infectiousness for n in neighbors)
+        logging.debug(f'TOTAL INFECTIOUSNESS IS {total_infectiousness}')
+
+        infection_probability = 0.0
+        # This deals with the evolution of the disease.
+        if total_infectiousness > 0:
+            infection_probability = total_infectiousness / (
+                        total_infectiousness + self.model.h_inf)
+        # Take a random cell from the neighboring diseased cells to inherit the disease characteristics from.
+        # TODO Fix this, this should be able to be done more cleanly.
+        logging.debug(f'infection_probability IS {infection_probability}')
+        if random.random() < infection_probability:
+            logging.debug('RANDOMNESS DID TRIGGER IN THE STEP METHOD')
+            self.nxt.state = CellState.INFECTED
+            # Inherit infectiousness of one infecting neighbor.now.
+            infection_probability_sum = 0.0  # A random value that gets bumped up as time goes on.
+            rand = random.uniform(0,
+                                    total_infectiousness)  # A random value that is uniformly distributed,
+            # it goes from zero to the total infectiousness..
+            # Filter the cells that are diseased.
+            for neighbor in neighbors:
+                if neighbor.now.state == CellState.SUSCEPTIBLE:
+                    # bump up the bump value by its susceptibility.
+                    infection_probability_sum += neighbor.now.infectiousness
+                    # if the cell has not randomly been infected yet by one of its neighbors the change of
+                    # infection will rise.
+                    if rand < infection_probability_sum:
+                        # Inherit pathogen characteristics from infecting neighbor.now.
+                        self.nxt.infectiousness = neighbor.now.infectiousness
+                        self.nxt.infection_duration = neighbor.now.infection_duration
+                        break
+        # This just seems (?) to amount to taking one of the INFECTED neighbors of a
+        # SUSCEPTIBLE cell at random and inheriting its characteristics
+        # when becoming infected by it at random.
+
+        # TODO We can use something like:
+        # random.choices(neighbors, weights=(neighbors weighted by infectiousness))
+        # Infectiousness
+        # to replace almost this whole part of the method. (I think?)
+
+    def transfer_state_i_to_r(self):
+        # Cells will recover over time.
+        logging.debug('OUTER TRIGGER')
+        if self.now.tick > self.now.infection_duration:
+            logging.debug('INNER TRIGGER f{self.now.tick, self.now.infection_duration}')
+            # If the cell was SUSCEPTIBLE and it was sick for long enough we will set it to "CellState.RESISTANT"
+            self.nxt.state = CellState.RESISTANT
+            self.nxt.infectiousness = 0.0
+            self.nxt.infection_duration = 0
+            self.now.tick = 0
+        # Else count how long it has been ill (and apply potential mutations *on next pass*)
+        else:
+            self.now.tick += 1
+
+    def transfer_state_r_to_s(self):
+        pass
 
     def advance(self):
         """Set the now state to the new calculated internal state."""
