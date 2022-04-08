@@ -6,6 +6,11 @@ from mesa import Agent
 from dataclasses import dataclass
 import typing
 
+tick: typing.TypeAlias = int
+tick.__doc__ = "A type alias of int for our model, it represents " \
+               "how many ticks have passed since a relevant event happened to" \
+               "our cell."
+
 
 class CellState(Enum):
     """An enum that determines the states that the cells in our CA can be in.
@@ -19,11 +24,29 @@ class CellState(Enum):
 
 @dataclass
 class MutableData:
-    state: CellState = CellState.SUSCEPTIBLE  # State of cell of CA = SUS | INF | RES
-    infectiousness: float = 0.0  # Infection strength per infected individual
-    infection_duration: int = 0  # Duration of infection
-    resistance_duration: int = 0  # Duration of resistance
-    tick: int = 0  # Current tick the cell is on.
+    """"A struct of all the relevant data for a single cell in our CA.
+
+    Putting it into a single struct makes updating the state of our Cells
+    easier.
+
+    Attributes
+    ----------
+    state : CellState
+        State of a cell of our CA = SUSCEPTIBLE | INFECTED | RESISTANT
+    infectiousness : float
+        Severity of the infection per affected individual.
+    infection_duration : tick
+        Duration of the infection (in ticks).
+    resistance_duration : tick
+        How long the cell will stay resistant after recovery (in ticks).
+    tick : tick
+        The current tick the cell is on.
+    """
+    state: CellState = CellState.SUSCEPTIBLE
+    infectiousness: float = 0.0
+    infection_duration: tick = 0
+    resistance_duration: tick = 0
+    tick: tick = 0
 
 
 class Cell(Agent):
@@ -34,7 +57,9 @@ class Cell(Agent):
         super().__init__(position, model)
         self.position = position
         self.now = MutableData(initial_state)
+        self.now.__doc__ = "The current mutable data."
         self.nxt = MutableData()
+        self.nxt.__doc__ = "The next mutable data that we're calculating."
 
     @property
     def neighbors(self) -> list['Cell']:
@@ -44,7 +69,10 @@ class Cell(Agent):
                                              include_center=False)
 
     @property
-    def infection_load(self):
+    def infection_load(self) -> float:
+        """The severity of the infection load the current cell is affected by
+
+        Due to the infectiousness of the disease in neighboring Cells."""
         return sum(n.now.infectiousness for n in self.neighbors)
 
     def step(self):
@@ -59,6 +87,10 @@ class Cell(Agent):
             self.transfer_state_r_to_s()
 
     def transfer_state_s_to_i(self):
+        """Transfer the state from CellState.SUSCEPTIBLE to
+        CellSTATE.INFECTED, if more time than self.infection_duration has
+        passed, else just increment current tick.
+        """
         logging.debug(f'SUS AT: {self.position} IN{self}')
         neighbors: list[Cell] = self.neighbors
         logging.debug(f'NEIGBOURS: {neighbors}')
@@ -71,7 +103,7 @@ class Cell(Agent):
             infection_probability = infection_load / (
                     infection_load + self.model.h_inf)
         # Take a random cell from the neighboring diseased cells to inherit the disease characteristics from.
-        # TODO Fix this, this should be able to be done more cleanly.
+        # FIXME: Fix this, this should be able to be done more cleanly.
         logging.debug(f'infection_probability IS {infection_probability}')
         if random.random() < infection_probability:
             logging.debug('RANDOMNESS DID TRIGGER IN THE STEP METHOD')
@@ -79,17 +111,19 @@ class Cell(Agent):
             # Inherit infectiousness of one infecting neighbor.now.
             infection_probability_sum = 0.0  # A random value that gets bumped up as time goes on.
             rand = random.uniform(0,
-                                  infection_load)  # A random value that is uniformly distributed,
+                                  infection_load)  # A random value that is
+            # uniformly distributed,
             # it goes from zero to the total infectiousness..
             # Filter the cells that are diseased.
             for neighbor in neighbors:
                 if neighbor.now.state == CellState.SUSCEPTIBLE:
                     # bump up the bump value by its susceptibility.
                     infection_probability_sum += neighbor.now.infectiousness
-                    # if the cell has not randomly been infected yet by one of its neighbors the change of
-                    # infection will rise.
+                    # if the cell has not randomly been infected yet by one
+                    # of its neighbors the change of infection will rise.
                     if rand < infection_probability_sum:
-                        # Inherit pathogen characteristics from infecting neighbor.now.
+                        # Inherit pathogen characteristics from infecting
+                        # neighbor.now.
                         self.nxt.infectiousness = neighbor.now.infectiousness
                         self.nxt.infection_duration = neighbor.now.infection_duration
                         break
@@ -97,23 +131,31 @@ class Cell(Agent):
         # SUSCEPTIBLE cell at random and inheriting its characteristics
         # when becoming infected by it at random.
 
-        # TODO We can use something like:
+        # FIXME: We can use something like:
         # random.choices(neighbors, weights=(neighbors weighted by infectiousness))
         # Infectiousness
         # to replace almost this whole part of the method. (I think?)
 
     def transfer_state_i_to_r(self):
+        """Transfer the state from CellState.INFECTED to
+        CellSTATE.RESISTANT, if more time than self.infection_duration has
+        passed, else just increment current tick.
+        """
         if self.now.tick > self.now.infection_duration:
             self.nxt = MutableData(CellState.RESISTANT)
         else:
             self.now.tick += 1
 
     def transfer_state_r_to_s(self):
+        """Transfer the state from CellState.RESISTANT to
+        CellSTATE.SUSCEPTIBLE, if more time than self.resistance_duration has
+        passed, else just increment current tick.
+        """
         if self.now.tick > self.now.resistance_duration:
             self.nxt = MutableData(CellState.SUSCEPTIBLE)
         else:
             self.now.tick += 1
 
     def advance(self):
-        """Set the now state to the new calculated internal state."""
+        """Set the now state to the nxt calculated internal state."""
         self.now = self.nxt

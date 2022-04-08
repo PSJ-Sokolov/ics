@@ -14,7 +14,7 @@ from cell import Cell, CellState  # Function that describes behaviour of single 
 
 # The next bit uses some functional programming techniques (Haskell, LISP) such as partial application and currying.
 CS, cs = CellState, lambda m: m.schedule.agents
-def fracN(s):
+def fracN(s: CellState):
     """Currying function that manufactures functions that calculate fraction of cells in a certain state `s' inside
     model `m' """
     return lambda m: len([c.now.state for c in cs(m) if c.now.state == s]) / len(cs(m))
