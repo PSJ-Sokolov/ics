@@ -1,13 +1,13 @@
 from __future__ import annotations
-import logging
-import netrc
 import random
 from enum import Enum, auto
 from mesa import Agent, Model
 from dataclasses import dataclass
 import typing
+#import model
+# SIRModel = model.SIRModel
 
-# from model import SIRModel
+# from sir_model import SIRModel
 
 tick: typing.TypeAlias = int  # Ticks as type that have happened since event.
 
@@ -15,7 +15,7 @@ tick: typing.TypeAlias = int  # Ticks as type that have happened since event.
 class CellState(Enum):
     """An enum that determines the states that the cells in our CA can be in.
 
-    Because we use a SIR model they can either be S -- SUSCEPTIBLE, I -- INFECTED, or R -- RESISTANT
+    Because we use a SIR sir_model they can either be S -- SUSCEPTIBLE, I -- INFECTED, or R -- RESISTANT
     """
     SUSCEPTIBLE = auto()
     INFECTED = auto()
@@ -52,10 +52,10 @@ class Genome:
 class Cell(Agent):
     """Description of the grid points of the CA"""
 
-    def __init__(self, position: tuple[int, int], model: Model,
+    def __init__(self, position: tuple[int, int], sir_model: SIRModel,
                  initial_state: CellState = CellState.SUSCEPTIBLE):
         """Create cell in given x,y position, with given initial state"""
-        super().__init__(position, model)
+        super().__init__(position, sir_model)
         self.position: tuple[int, int] = position
         self.now: Genome = Genome(initial_state)
         self.nxt: Genome = Genome()
@@ -127,13 +127,11 @@ class Cell(Agent):
         return self.infection_load / (self.infection_load + self.model.h_inf)
 
     @property
-    def mutated_data(self) -> Genome:
+    def mutated_genome(self, tick=0) -> Genome:
         i = max(0.0, self.now.infectiousness + random.gauss(0, 1))
         di = max(1, self.now.infection_duration + random.randrange(-1, 1))
         dr = max(1, self.now.resistance_duration + random.randrange(-1, 1))
-        return Genome(CellState.INFECTED, infectiousness=i,
-                      infection_duration=di,
-                      resistance_duration=dr)
+        return Genome(CellState.INFECTED, i, di, dr, self.now.tick)
 
     def transfer_state_s_to_i(self):
         """Transfer the state from CellState.SUSCEPTIBLE to
@@ -142,15 +140,15 @@ class Cell(Agent):
         """
         # Do we have infected neighbors?
         if list(self.infected_neighbors):
-            logging.debug( f"{self.position=} HAS INFECTED " f"{list(self.infected_neighbors)=}")
             # And we're lucky enough to get infected.
             if random.random() < self.infection_probability:
-                logging.debug(f"CELL HAS BEEN CHOSEN {self.infection_probability=}")
                 # Get infected by a mutation of a random neighbor.
                 if n := self.random_infected_neighbor:
-                    logging.debug(f"{n=}")
                     # Take random infected neighboring cell & inherit from it.
-                    self.nxt = n.mutated_data
+                    self.nxt = n.mutated_genome
+
+    def tick(self):
+        self.now.tick += 1
 
     def transfer_state_i_to_r(self):
         """Transfer the state from CellState.INFECTED to
@@ -160,7 +158,8 @@ class Cell(Agent):
         if self.now.tick > self.now.infection_duration:
             self.nxt = Genome(CellState.RESISTANT)
         else:
-            self.now.tick += 1
+            self.tick()
+            self.nxt = self.mutated_genome
 
     def transfer_state_r_to_s(self):
         """Transfer the state from CellState.RESISTANT to
@@ -170,7 +169,7 @@ class Cell(Agent):
         if self.now.tick > self.now.resistance_duration:
             self.nxt = Genome(CellState.SUSCEPTIBLE)
         else:
-            self.now.tick += 1
+            self.tick()
 
     def advance(self):
         """Set the now state to the nxt calculated internal state."""

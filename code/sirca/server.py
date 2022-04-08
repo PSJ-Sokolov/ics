@@ -51,6 +51,6 @@ chartMI = ChartModule([{"Label": "Mean_infection_duration", "Color": "Black"}], 
 
 
 def make_server(i=2.0, di=5, hi=10):
-    """ Launch the server that will run and display the model """
-    return ModularServer(model_factory(i, di, hi), [grid, chartSIR, chartMI], "SIR-model",
+    """ Launch the server that will run and display the sir_model """
+    return ModularServer(model_factory(i, di, hi), [grid, chartSIR, chartMI], "SIR-sir_model",
                          {"width": grid_Width, "height": grid_Height})

@@ -7,7 +7,7 @@ from server import make_server
 if __name__ == '__main__':
     import argparse
 
-    parser = argparse.ArgumentParser(description='Run model', epilog='live long and prosper!')
+    parser = argparse.ArgumentParser(description='Run sir_model', epilog='live long and prosper!')
     parser.add_argument('-i', action='store', type=float, default=2.0, help='Provide infectiousness (2.0 by default)')
     parser.add_argument('-d', action='store', type=int, default=5, help='Provide infectiousness_duration (5 by default)')
     parser.add_argument('-r', action='store', type=int, default=10, help='Provide h_infectiousness (10 by default)')
