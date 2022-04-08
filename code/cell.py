@@ -6,10 +6,9 @@ from mesa import Agent
 from dataclasses import dataclass
 import typing
 
-tick: typing.TypeAlias = int
-tick.__doc__ = "A type alias of int for our model, it represents " \
-               "how many ticks have passed since a relevant event happened to" \
-               "our cell."
+# from model import SIRModel
+
+tick: typing.TypeAlias = int  # Ticks as type that have happened since event.
 
 
 class CellState(Enum):
@@ -52,17 +51,16 @@ class MutableData:
 class Cell(Agent):
     """Description of the grid points of the CA"""
 
-    def __init__(self, position, model, initial_state=CellState.SUSCEPTIBLE):
+    def __init__(self, position: tuple[int, int], model: SIRModel,
+                 initial_state: CellState = CellState.SUSCEPTIBLE):
         """Create cell in given x,y position, with given initial state"""
         super().__init__(position, model)
-        self.position = position
-        self.now = MutableData(initial_state)
-        self.now.__doc__ = "The current mutable data."
-        self.nxt = MutableData()
-        self.nxt.__doc__ = "The next mutable data that we're calculating."
+        self.position: tuple[int,int] = position
+        self.now: MutableData = MutableData(initial_state)
+        self.nxt: MutableData = MutableData()
 
     @property
-    def neighbors(self) -> list['Cell']:
+    def neighbors(self) -> list[Cell]:
         """ Get a list of the 8 surrounding neighbors of the now cell (
         cardinal and diagonal). """
         return self.model.grid.get_neighbors(self.position, moore=True,
@@ -92,8 +90,7 @@ class Cell(Agent):
         passed, else just increment current tick.
         """
         logging.debug(f'SUS AT: {self.position} IN{self}')
-        neighbors: list[Cell] = self.neighbors
-        logging.debug(f'NEIGBOURS: {neighbors}')
+        logging.debug(f'NEIGBOURS: {self.neighbors}')
         # Sum total_infection for the now cell.
         logging.debug(f'TOTAL INFECTIOUSNESS IS {self.infection_load}')
 
@@ -115,7 +112,7 @@ class Cell(Agent):
             # uniformly distributed,
             # it goes from zero to the total infectiousness..
             # Filter the cells that are diseased.
-            for neighbor in neighbors:
+            for neighbor in self.neighbors:
                 if neighbor.now.state == CellState.SUSCEPTIBLE:
                     # bump up the bump value by its susceptibility.
                     infection_probability_sum += neighbor.now.infectiousness
