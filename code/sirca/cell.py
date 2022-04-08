@@ -4,7 +4,7 @@ from enum import Enum, auto
 from mesa import Agent, Model
 from dataclasses import dataclass
 import typing
-import model
+#import model
 
 # from model import SIRModel
 

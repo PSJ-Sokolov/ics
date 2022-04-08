@@ -42,9 +42,10 @@ class SIRModel(mesa.Model):
         self.resistance_duration: cell.tick = 10
         self.h_inf: float = 10  # Scaling of infectiousness
         self.seed_density: float = 0.1
+        self.torus = True
 
         # Initialize components:
-        self.grid = mesa.space.SingleGrid(width, height, torus=True)
+        self.grid = mesa.space.SingleGrid(width, height, torus=self.torus)
         self.schedule = mesa.time.SimultaneousActivation(self)
         self.running = True
 
@@ -82,7 +83,7 @@ class SIRModel(mesa.Model):
         self.schedule.step()
 
 
-def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1) -> SIRModel:
+def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1, t=True) -> SIRModel:
     class ParameterizedSIRModel(SIRModel):
         def __init__(self, width, height):
             super().__init__(width, height)
@@ -91,5 +92,6 @@ def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1) -> SIRModel:
             self.resistance_duration = dr
             self.h_inf = hi
             self.seed_density = d
+            self.torus = t
 
     return ParameterizedSIRModel

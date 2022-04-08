@@ -1,6 +1,5 @@
 # STD INCLUDE:
 from __future__ import annotations
-import logging
 
 # MESA INCLUDE:
 from mesa.visualization.modules import CanvasGrid
@@ -33,12 +32,10 @@ def portray_cell(cell: Cell):
     return portrayal
 
 
-""" Construct the simulation grid, all cells displayed as 5x5 squares """
-grid_Width = 100  # Change these parameters to change the grid size
-grid_Height = 100
+def make_grid(width=100, height=100):
+    return CanvasGrid(portray_cell, width, height, 5 * width, 5 * height)
 
-# Make a grid to plot the population dynamics
-grid = CanvasGrid(portray_cell, grid_Width, grid_Height, 5 * grid_Width, 5 * grid_Height)
+
 # Make a chart for plotting the density of individuals
 # TODO turn this into a stacked graph (if MESA supports this)
 chartSIR = ChartModule([
@@ -47,12 +44,13 @@ chartSIR = ChartModule([
     {'Label': 'R', 'Color': COLORS[CellState.RESISTANT]},
 ], data_collector_name='dataCollector1')
 # Let chart plot the mean infection time
-chartMI = ChartModule([{"Label": "Mean_infection_duration", "Color": "Black"}], data_collector_name="dataCollector2")
+chartMI = ChartModule([{"Label": "Mean_infection_duration", "Color": "Black"}],
+                      data_collector_name="dataCollector2")
 
 
-def make_server(i=2.0, di=5, hi=10, dr=10, d=0.1):
+def make_server(i=2.0, di=5, hi=10, dr=10, d=0.1, t=True, w=100, h=100):
     """ Launch the server that will run and display the model """
-    return ModularServer(model_factory(i, di, hi, dr, d),
-                         [grid, chartSIR, chartMI],
+    return ModularServer(model_factory(i, di, hi, dr, d, t),
+                         [make_grid(w, h), chartSIR, chartMI],
                          "SIR-model",
-                         {"width": grid_Width, "height": grid_Height})
+                         {"width": w, "height": h})
