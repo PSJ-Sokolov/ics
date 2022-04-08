@@ -28,7 +28,7 @@ def portray_cell(cell: Cell):
         'Filled': 'true',
         'Layer': 1,
     }
-    logging.debug(f"Cell at {cell.position} with state: {cell.now.state}")
+    # logging.debug(f"Cell at {cell.position} with state: {cell.now.state}")
     portrayal["Color"] = COLORS[cell.now.state]
     return portrayal
 

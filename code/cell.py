@@ -1,8 +1,9 @@
 from __future__ import annotations
 import logging
+import netrc
 import random
 from enum import Enum, auto
-from mesa import Agent
+from mesa import Agent, Model
 from dataclasses import dataclass
 import typing
 
@@ -22,7 +23,7 @@ class CellState(Enum):
 
 
 @dataclass
-class MutableData:
+class Genome:
     """"A struct of all the relevant data for a single cell in our CA.
 
     Putting it into a single struct makes updating the state of our Cells
@@ -51,27 +52,13 @@ class MutableData:
 class Cell(Agent):
     """Description of the grid points of the CA"""
 
-    def __init__(self, position: tuple[int, int], model: SIRModel,
+    def __init__(self, position: tuple[int, int], model: Model,
                  initial_state: CellState = CellState.SUSCEPTIBLE):
         """Create cell in given x,y position, with given initial state"""
         super().__init__(position, model)
-        self.position: tuple[int,int] = position
-        self.now: MutableData = MutableData(initial_state)
-        self.nxt: MutableData = MutableData()
-
-    @property
-    def neighbors(self) -> list[Cell]:
-        """ Get a list of the 8 surrounding neighbors of the now cell (
-        cardinal and diagonal). """
-        return self.model.grid.get_neighbors(self.position, moore=True,
-                                             include_center=False)
-
-    @property
-    def infection_load(self) -> float:
-        """The severity of the infection load the current cell is affected by
-
-        Due to the infectiousness of the disease in neighboring Cells."""
-        return sum(n.now.infectiousness for n in self.neighbors)
+        self.position: tuple[int, int] = position
+        self.now: Genome = Genome(initial_state)
+        self.nxt: Genome = Genome()
 
     def step(self):
         """Compute the next state of a cell"""
@@ -84,54 +71,86 @@ class Cell(Agent):
         elif self.now.state == CellState.RESISTANT:
             self.transfer_state_r_to_s()
 
+    @property
+    def neighbors(self) -> list[Cell]:
+        """ Get a list of the 8 surrounding neighbors of the now cell (
+        cardinal and diagonal). """
+        return self.model.grid.get_neighbors(self.position, moore=True,
+                                             include_center=False)
+
+    def get_neighbors_by_state(self, state: CellState) -> typing.Iterable[Cell]:
+        """Get the neighbors of the current Cell that are of a certain
+        CellState state.
+
+        Parameters
+        ----------
+        state : CellState
+            A state that we want to filter the neighbors by.
+
+        Returns
+        -------
+        typing.Iterable[Cell]
+            Neighbors of the current cell that have Cell.now.state == state
+        """
+        return (n for n in self.neighbors if n.now.state == state)
+
+    @property
+    def infected_neighbors(self) -> typing.Iterable[Cell]:
+        """
+
+        Returns
+        -------
+
+        """
+        return self.get_neighbors_by_state(CellState.INFECTED)
+
+    @property
+    def random_infected_neighbor(self) -> Cell:
+        xs = list(self.infected_neighbors)
+        return random.choices(xs, [x.now.infectiousness for x in xs])[0]
+
+    @property
+    def infection_load(self) -> float:
+        """The severity of the infection load the current cell is affected by
+
+        Due to the infectiousness of the disease in neighboring Cells."""
+        return sum(n.now.infectiousness for n in self.neighbors)
+
+    @property
+    def infection_probability(self) -> float:
+        """Calculates the probability this cell could get infected.
+
+        Returns
+        -------
+        The probability that this cell could get infected [0,1].
+        """
+        return self.infection_load / (self.infection_load + self.model.h_inf)
+
+    @property
+    def mutated_data(self) -> Genome:
+        i = max(0.0, self.now.infectiousness + random.gauss(0, 1))
+        di = max(1, self.now.infection_duration + random.randrange(-1, 1))
+        dr = max(1, self.now.resistance_duration + random.randrange(-1, 1))
+        return Genome(CellState.INFECTED, infectiousness=i,
+                      infection_duration=di,
+                      resistance_duration=dr)
+
     def transfer_state_s_to_i(self):
         """Transfer the state from CellState.SUSCEPTIBLE to
         CellSTATE.INFECTED, if more time than self.infection_duration has
         passed, else just increment current tick.
         """
-        logging.debug(f'SUS AT: {self.position} IN{self}')
-        logging.debug(f'NEIGBOURS: {self.neighbors}')
-        # Sum total_infection for the now cell.
-        logging.debug(f'TOTAL INFECTIOUSNESS IS {self.infection_load}')
-
-        infection_probability, infection_load = 0.0, self.infection_load
-        # This deals with the evolution of the disease.
-        if infection_load > 0:
-            infection_probability = infection_load / (
-                    infection_load + self.model.h_inf)
-        # Take a random cell from the neighboring diseased cells to inherit the disease characteristics from.
-        # FIXME: Fix this, this should be able to be done more cleanly.
-        logging.debug(f'infection_probability IS {infection_probability}')
-        if random.random() < infection_probability:
-            logging.debug('RANDOMNESS DID TRIGGER IN THE STEP METHOD')
-            self.nxt.state = CellState.INFECTED
-            # Inherit infectiousness of one infecting neighbor.now.
-            infection_probability_sum = 0.0  # A random value that gets bumped up as time goes on.
-            rand = random.uniform(0,
-                                  infection_load)  # A random value that is
-            # uniformly distributed,
-            # it goes from zero to the total infectiousness..
-            # Filter the cells that are diseased.
-            for neighbor in self.neighbors:
-                if neighbor.now.state == CellState.SUSCEPTIBLE:
-                    # bump up the bump value by its susceptibility.
-                    infection_probability_sum += neighbor.now.infectiousness
-                    # if the cell has not randomly been infected yet by one
-                    # of its neighbors the change of infection will rise.
-                    if rand < infection_probability_sum:
-                        # Inherit pathogen characteristics from infecting
-                        # neighbor.now.
-                        self.nxt.infectiousness = neighbor.now.infectiousness
-                        self.nxt.infection_duration = neighbor.now.infection_duration
-                        break
-        # This just seems (?) to amount to taking one of the INFECTED neighbors of a
-        # SUSCEPTIBLE cell at random and inheriting its characteristics
-        # when becoming infected by it at random.
-
-        # FIXME: We can use something like:
-        # random.choices(neighbors, weights=(neighbors weighted by infectiousness))
-        # Infectiousness
-        # to replace almost this whole part of the method. (I think?)
+        # Do we have infected neighbors?
+        if list(self.infected_neighbors):
+            logging.debug( f"{self.position=} HAS INFECTED " f"{list(self.infected_neighbors)=}")
+            # And we're lucky enough to get infected.
+            if random.random() < self.infection_probability:
+                logging.debug(f"CELL HAS BEEN CHOSEN {self.infection_probability=}")
+                # Get infected by a mutation of a random neighbor.
+                if n := self.random_infected_neighbor:
+                    logging.debug(f"{n=}")
+                    # Take random infected neighboring cell & inherit from it.
+                    self.nxt = n.mutated_data
 
     def transfer_state_i_to_r(self):
         """Transfer the state from CellState.INFECTED to
@@ -139,7 +158,7 @@ class Cell(Agent):
         passed, else just increment current tick.
         """
         if self.now.tick > self.now.infection_duration:
-            self.nxt = MutableData(CellState.RESISTANT)
+            self.nxt = Genome(CellState.RESISTANT)
         else:
             self.now.tick += 1
 
@@ -149,7 +168,7 @@ class Cell(Agent):
         passed, else just increment current tick.
         """
         if self.now.tick > self.now.resistance_duration:
-            self.nxt = MutableData(CellState.SUSCEPTIBLE)
+            self.nxt = Genome(CellState.SUSCEPTIBLE)
         else:
             self.now.tick += 1
 
