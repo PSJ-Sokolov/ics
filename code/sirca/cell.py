@@ -4,10 +4,9 @@ from enum import Enum, auto
 from mesa import Agent, Model
 from dataclasses import dataclass
 import typing
-#import model
-# SIRModel = model.SIRModel
+import model
 
-# from sir_model import SIRModel
+# from model import SIRModel
 
 tick: typing.TypeAlias = int  # Ticks as type that have happened since event.
 
@@ -15,7 +14,7 @@ tick: typing.TypeAlias = int  # Ticks as type that have happened since event.
 class CellState(Enum):
     """An enum that determines the states that the cells in our CA can be in.
 
-    Because we use a SIR sir_model they can either be S -- SUSCEPTIBLE, I -- INFECTED, or R -- RESISTANT
+    Because we use a SIR model they can either be S -- SUSCEPTIBLE, I -- INFECTED, or R -- RESISTANT
     """
     SUSCEPTIBLE = auto()
     INFECTED = auto()
@@ -52,10 +51,15 @@ class Genome:
 class Cell(Agent):
     """Description of the grid points of the CA"""
 
-    def __init__(self, position: tuple[int, int], sir_model: SIRModel,
+    def __init__(self, position: tuple[int, int], model: model.SIRModel,
                  initial_state: CellState = CellState.SUSCEPTIBLE):
-        """Create cell in given x,y position, with given initial state"""
-        super().__init__(position, sir_model)
+        """Create cell in given x,y position, with given initial state
+
+        Parameters
+        ----------
+        model : object
+        """
+        super().__init__(position, model)
         self.position: tuple[int, int] = position
         self.now: Genome = Genome(initial_state)
         self.nxt: Genome = Genome()

@@ -50,7 +50,9 @@ chartSIR = ChartModule([
 chartMI = ChartModule([{"Label": "Mean_infection_duration", "Color": "Black"}], data_collector_name="dataCollector2")
 
 
-def make_server(i=2.0, di=5, hi=10):
-    """ Launch the server that will run and display the sir_model """
-    return ModularServer(model_factory(i, di, hi), [grid, chartSIR, chartMI], "SIR-sir_model",
+def make_server(i=2.0, di=5, hi=10, dr=10, d=0.1):
+    """ Launch the server that will run and display the model """
+    return ModularServer(model_factory(i, di, hi, dr, d),
+                         [grid, chartSIR, chartMI],
+                         "SIR-model",
                          {"width": grid_Width, "height": grid_Height})
