@@ -6,6 +6,7 @@ from mesa import Agent
 from dataclasses import dataclass
 import typing
 
+
 class CellState(Enum):
     """An enum that determines the states that the cells in our CA can be in.
 
@@ -17,7 +18,7 @@ class CellState(Enum):
 
 
 @dataclass
-class MutableData():
+class MutableData:
     state: CellState = CellState.SUSCEPTIBLE  # State of cell of CA = SUS | INF | RES
     infectiousness: float = 0.0  # Infection strength per infected individual
     infection_duration: int = 0  # Duration of infection
@@ -35,16 +36,20 @@ class Cell(Agent):
         self.now = MutableData(initial_state)
         self.nxt = MutableData()
 
-
-    def get_neighbors(self) -> list['Cell']:
+    @property
+    def neighbors(self) -> list['Cell']:
         """ Get a list of the 8 surrounding neighbors of the now cell (
         cardinal and diagonal). """
         return self.model.grid.get_neighbors(self.position, moore=True,
                                              include_center=False)
 
+    @property
+    def infection_load(self):
+        return sum(n.now.infectiousness for n in self.neighbors)
+
     def step(self):
         """Compute the next state of a cell"""
-        self.nxt = self.now # Ordinary case: Just update
+        self.nxt = self.now  # Ordinary case: Just update
 
         if self.now.state == CellState.SUSCEPTIBLE:
             self.transfer_state_s_to_i()
@@ -55,18 +60,16 @@ class Cell(Agent):
 
     def transfer_state_s_to_i(self):
         logging.debug(f'SUS AT: {self.position} IN{self}')
-        neighbors : list[Cell] = self.get_neighbors()
+        neighbors: list[Cell] = self.neighbors
         logging.debug(f'NEIGBOURS: {neighbors}')
         # Sum total_infection for the now cell.
-        total_infectiousness = sum(
-            n.now.infectiousness for n in neighbors)
-        logging.debug(f'TOTAL INFECTIOUSNESS IS {total_infectiousness}')
+        logging.debug(f'TOTAL INFECTIOUSNESS IS {self.infection_load}')
 
-        infection_probability = 0.0
+        infection_probability, infection_load = 0.0, self.infection_load
         # This deals with the evolution of the disease.
-        if total_infectiousness > 0:
-            infection_probability = total_infectiousness / (
-                        total_infectiousness + self.model.h_inf)
+        if infection_load > 0:
+            infection_probability = infection_load / (
+                    infection_load + self.model.h_inf)
         # Take a random cell from the neighboring diseased cells to inherit the disease characteristics from.
         # TODO Fix this, this should be able to be done more cleanly.
         logging.debug(f'infection_probability IS {infection_probability}')
@@ -76,7 +79,7 @@ class Cell(Agent):
             # Inherit infectiousness of one infecting neighbor.now.
             infection_probability_sum = 0.0  # A random value that gets bumped up as time goes on.
             rand = random.uniform(0,
-                                    total_infectiousness)  # A random value that is uniformly distributed,
+                                  infection_load)  # A random value that is uniformly distributed,
             # it goes from zero to the total infectiousness..
             # Filter the cells that are diseased.
             for neighbor in neighbors:
