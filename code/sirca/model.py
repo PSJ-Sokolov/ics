@@ -1,4 +1,5 @@
 # STD IMPORT
+import logging
 import random
 from statistics import mean, StatisticsError
 
@@ -47,7 +48,7 @@ def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1, w=100, h=100, t=True):
 
             # Initialize components:
             self.grid = SingleGrid(width, height, torus=self.torus)
-            print(f"SET THE GRID {self.grid=}")
+            logging.debug(f"SET THE GRID {self.grid=}")
             self.schedule = SimultaneousActivation(self)
             self.running = True
 
@@ -64,7 +65,7 @@ def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1, w=100, h=100, t=True):
                                                        self.infection_duration))
                 self.grid.place_agent(c, (x, y))
                 self.schedule.add(c)
-                print(f"CELL: {c.now=}")
+                logging.debug(f"CELL: {c.now=}")
 
             # Plot fraction of population by type.
             self.dataCollector1 = mesa.datacollection.DataCollector(
@@ -113,10 +114,10 @@ def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1, w=100, h=100, t=True):
                 m = mean(c.now.tick for c in cs(self) if c.now.state ==
                          CS.RESISTANT)
             except StatisticsError as Err:
-                print(f"THERE ARE NO RESISTANT CELLS TO TAKE A MEAN FROM.")
+                logging.debug(f"THERE ARE NO RESISTANT CELLS TO TAKE A MEAN FROM.")
                 return 0
             else:
-                print(f"MEAN RESISTANT TICK IS: {m}")
+                logging.debug(f"MEAN RESISTANT TICK IS: {m}")
                 return m
 
         def mean_infected_tick(self) -> float:
@@ -125,10 +126,10 @@ def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1, w=100, h=100, t=True):
                 m = mean(c.now.tick for c in cs(self) if c.now.state ==
                           CS.INFECTED)
             except StatisticsError as Err:
-                print(f"THERE ARE NO INFECTED CELLS TO TAKE A MEAN FROM.")
+                logging.debug(f"THERE ARE NO INFECTED CELLS TO TAKE A MEAN FROM.")
                 return 0
             else:
-                print(f"MEAN INFECTED TICK IS: {m}")
+                logging.debug(f"MEAN INFECTED TICK IS: {m}")
                 return m
 
 

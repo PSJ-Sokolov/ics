@@ -160,16 +160,16 @@ class Cell(Agent):
         passed, else just increment current tick.
         """
         # Do we have infected neighbors?
-        print("ON SUSCEPTIBLE CELL")
+        logging.debug("ON SUSCEPTIBLE CELL")
         if list(self.infected_neighbors):
-            print("THE SUSCEPTIBLE CELL HAS INFECTED NEIGHBORS")
+            logging.debug("THE SUSCEPTIBLE CELL HAS INFECTED NEIGHBORS")
             # And we're lucky enough to get infected.
             if random.random() < self.infection_probability:
-                print("WE'RE GETTING INFECTED")
+                logging.debug("WE'RE GETTING INFECTED")
                 # Get infected by a mutation of a random neighbor.
-                print("CHOOSING A RANDOM NEIGBOR")
+                logging.debug("CHOOSING A RANDOM NEIGBOR")
                 if n := self.random_infected_neighbor:
-                    print(f"THE RANDOM NEIGHBOR IS {n}, {n.now}")
+                    logging.debug(f"THE RANDOM NEIGHBOR IS {n}, {n.now}")
                     # Take random infected neighboring cell & inherit from it.
                     self.nxt = n.mutated_genome
 
@@ -181,12 +181,12 @@ class Cell(Agent):
         CellSTATE.RESISTANT, if more time than self.infection_duration has
         passed, else just increment current tick.
         """
-        print(f"ON INFECTED {self.position=}, {self.now=}")
+        logging.debug(f"ON INFECTED {self.position=}, {self.now=}")
         if self.now.tick > self.now.infection_duration:
-            print(f"RECOVERING {self.position=}, {self.now=}")
+            logging.debug(f"RECOVERING {self.position=}, {self.now=}")
             self.nxt = self.transfer_genome(CellState.RESISTANT)
         else:
-            print(f"TICKING INFECTED {self.position=}, {self.now=}")
+            logging.debug(f"TICKING INFECTED {self.position=}, {self.now=}")
             self.tick()
             self.nxt = self.mutated_genome
 
@@ -195,15 +195,15 @@ class Cell(Agent):
         CellSTATE.SUSCEPTIBLE, if more time than self.resistance_duration has
         passed, else just increment current tick.
         """
-        print(f"ON RESISTANT {self.position=}, {self.now=}")
+        logging.debug(f"ON RESISTANT {self.position=}, {self.now=}")
         if self.now.tick > self.now.resistance_duration:
-            print(f"AGAIN SUSCEPTIBLE {self.position=}, {self.now=}")
+            logging.debug(f"AGAIN SUSCEPTIBLE {self.position=}, {self.now=}")
             self.nxt = self.transfer_genome(CellState.SUSCEPTIBLE)
         else:
-            print(f"TICKING SUSCEPTIBLE {self.position=}, {self.now=}")
+            logging.debug(f"TICKING SUSCEPTIBLE {self.position=}, {self.now=}")
             self.tick()
 
     def advance(self):
         """Set the now state to the nxt calculated internal state."""
-        print(f"NEXT: {self.nxt=}")
+        logging.debug(f"NEXT: {self.nxt=}")
         self.now = self.nxt
