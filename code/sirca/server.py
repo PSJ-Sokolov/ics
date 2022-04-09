@@ -53,10 +53,10 @@ chartMI = ChartModule([{"Label": "Mean_infection_duration", "Color": "Black"}],
 chartDR = ChartModule([{"Label": "Mean_resistance_duration", "Color": "Black"}],
                       data_collector_name="dataCollector3")
 
-chartRT = ChartModule([{"Label": "mean_resistant_tick", "Color": "Black"}],
+chartRT = ChartModule([{"Label": "Mean_resistant_tick", "Color": "Black"}],
                       data_collector_name="dataCollector4")
 
-chartIT = ChartModule([{"Label": "mean_infected_tick", "Color": "Black"}],
+chartIT = ChartModule([{"Label": "Mean_infected_tick", "Color": "Black"}],
                       data_collector_name="dataCollector5")
 
 
