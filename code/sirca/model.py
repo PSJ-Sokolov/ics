@@ -1,6 +1,6 @@
 # STD IMPORT
 import random
-from statistics import mean
+from statistics import mean, StatisticsError
 
 # MESA:
 import mesa
@@ -81,8 +81,19 @@ def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1, w=100, h=100, t=True):
                     "Mean_resistance_duration": self.mean_resistance_duration
                 })
 
+            self.dataCollector4 = mesa.datacollection.DataCollector(
+                model_reporters={
+                    "Mean_resistant_tick": self.mean_resistant_tick
+                })
+
+            self.dataCollector5 = mesa.datacollection.DataCollector(
+                model_reporters={
+                    "Mean_infected_tick": self.mean_infected_tick
+                })
+
         def mean_infection_duration(self):
             """Computes the mean infection duration in all infected individuals"""
+            xs = cs(self)
             return mean(c.now.infection_duration for c in cs(self)
                         if c.now.state == CS.INFECTED)
 
@@ -96,6 +107,31 @@ def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1, w=100, h=100, t=True):
             return mean(c.now.resistance_duration for c in cs(self)
                         if c.now.state == CS.INFECTED)
 
+        def mean_resistant_tick(self) -> float:
+            """Computes the mean resistance duration in all resistant individuals"""
+            try:
+                m = mean(c.now.tick for c in cs(self) if c.now.state ==
+                         CS.RESISTANT)
+            except StatisticsError as Err:
+                print(f"THERE ARE NO RESISTANT CELLS TO TAKE A MEAN FROM.")
+                return 0
+            else:
+                print(f"MEAN RESISTANT TICK IS: {m}")
+                return m
+
+        def mean_infected_tick(self) -> float:
+            """Computes the mean resistance duration in all resistant individuals"""
+            try:
+                m = mean(c.now.tick for c in cs(self) if c.now.state ==
+                          CS.INFECTED)
+            except StatisticsError as Err:
+                print(f"THERE ARE NO INFECTED CELLS TO TAKE A MEAN FROM.")
+                return 0
+            else:
+                print(f"MEAN INFECTED TICK IS: {m}")
+                return m
+
+
         @property
         def parameters(self) -> str:
             return f"i:{self.infectiousness} di:{self.infection_duration} " \
@@ -106,6 +142,8 @@ def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1, w=100, h=100, t=True):
             self.dataCollector1.collect(self)
             self.dataCollector2.collect(self)
             self.dataCollector3.collect(self)
+            self.dataCollector4.collect(self)
+            self.dataCollector5.collect(self)
             self.schedule.step()
 
     return SIRModel

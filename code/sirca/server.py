@@ -51,6 +51,13 @@ chartMI = ChartModule([{"Label": "Mean_infection_duration", "Color": "Black"}],
 chartDR = ChartModule([{"Label": "Mean_resistance_duration", "Color": "Black"}],
                       data_collector_name="dataCollector3")
 
+chartRT = ChartModule([{"Label": "mean_resistant_tick", "Color": "Black"}],
+                      data_collector_name="dataCollector4")
+
+chartIT = ChartModule([{"Label": "mean_infected_tick", "Color": "Black"}],
+                      data_collector_name="dataCollector5")
+
+
 def makeText(model):
     return TextData(model, 'parameters')
 
@@ -58,9 +65,10 @@ def make_server(i=2.0, di=5, hi=10, dr=10, d=0.1, t=True, w=100, h=100):
     """ Launch the server that will run and display the model """
     m = model_factory(i, di, hi, dr, d, w, h, t)
     text = TextData(m, 'parameters')
-    print("TEXT IS",text.__dict__)
+    print("TEXT IS", text.__dict__)
     return ModularServer(m,
                          [make_grid(w, h), chartSIR, chartMI, chartDR,
+                          chartRT, chartIT,
                           #text,
                           ],
                          "SIR-model",
