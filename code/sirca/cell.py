@@ -1,16 +1,15 @@
-from __future__ import annotations
+"""
 
-import logging
+
+"""
+from __future__ import annotations
 import random
 from enum import Enum, auto
 from mesa import Agent, Model
 from dataclasses import dataclass
 import typing
 from sys import float_info
-EPS = float_info.epsilon
-# import model
-
-# from model import SIRModel
+EPSILON = float_info.epsilon
 
 tick: typing.TypeAlias = int  # Ticks as type that have happened since event.
 
@@ -72,18 +71,22 @@ class Cell(Agent):
     def step(self):
         """Compute the next state of a cell"""
         self.nxt = self.now  # Ordinary case: Just update
-
-        if self.now.state == CellState.SUSCEPTIBLE:
-            self.transfer_state_s_to_i()
-        elif self.now.state == CellState.INFECTED:
-            self.transfer_state_i_to_r()
-        elif self.now.state == CellState.RESISTANT:
-            self.transfer_state_r_to_s()
+        match self.now.state:
+            case CellState.SUSCEPTIBLE:
+                self.transfer_state_s_to_i()
+            case CellState.INFECTED:
+                self.transfer_state_i_to_r()
+            case CellState.RESISTANT:
+                self.transfer_state_r_to_s()
 
     @property
     def neighbors(self) -> list[Cell]:
         """ Get a list of the 8 surrounding neighbors of the now cell (
-        cardinal and diagonal). """
+        cardinal and diagonal).
+
+        Returns
+        -------
+        list[Cell]"""
         return self.model.grid.get_neighbors(self.position, moore=True,
                                              include_center=False)
 
@@ -109,27 +112,31 @@ class Cell(Agent):
 
         Returns
         -------
-
+        typing.Iterable[Cell]
         """
         return self.get_neighbors_by_state(CellState.INFECTED)
 
     @property
     def random_infected_neighbor(self) -> Cell:
-        xs = list(self.infected_neighbors)
-        xsi = [x.now.infectiousness for x in xs]
-        try:
-            n = random.choices(xs, xsi)[0]
-        except ValueError as err:
-            logging.debug(f"INFECTED NEIGBORS: {xs=} WEIGHTS!: {xsi=}, {err}")
-            raise SystemExit("CRASH AND BURN!")
-        else:
-            return n
+        """
+
+        Returns
+        -------
+        Cell
+
+        """
+        return random.choices(xs := list(self.infected_neighbors),
+                              [x.now.infectiousness for x in xs])[0]
 
     @property
     def infection_load(self) -> float:
         """The severity of the infection load the current cell is affected by
 
-        Due to the infectiousness of the disease in neighboring Cells."""
+        Due to the infectiousness of the disease in neighboring Cells.
+
+        Returns
+        -------
+        float"""
         return sum(n.now.infectiousness for n in self.neighbors)
 
     @property
@@ -138,21 +145,28 @@ class Cell(Agent):
 
         Returns
         -------
+        float
         The probability that this cell could get infected [0,1].
         """
         return self.infection_load / (self.infection_load + self.model.h_inf)
 
     @property
     def mutated_genome(self) -> Genome:
-        i = max(EPS, self.now.infectiousness + random.gauss(0, 1))
+        """
+
+        Returns
+        -------
+        Genome
+        """
+        i = max(EPSILON, self.now.infectiousness + random.gauss(0, 1))
         di = max(1, self.now.infection_duration + random.randrange(-1, 2))
         dr = max(1, self.now.resistance_duration + random.randrange(-1, 2))
         return Genome(CellState.INFECTED, i, di, dr, self.now.tick)
 
     def transfer_genome(self, state: CellState) -> Genome:
         """"""
-        x = self.now
-        return Genome(state, x.infectiousness, x.infection_duration,
+        return Genome(state, (x := self.now).infectiousness,
+                      x.infection_duration,
                       x.resistance_duration, tick=0)
 
     def transfer_state_s_to_i(self):
@@ -160,21 +174,13 @@ class Cell(Agent):
         CellSTATE.INFECTED, if more time than self.infection_duration has
         passed, else just increment current tick.
         """
-        # Do we have infected neighbors?
-        logging.debug("ON SUSCEPTIBLE CELL")
         if list(self.infected_neighbors):
-            logging.debug("THE SUSCEPTIBLE CELL HAS INFECTED NEIGHBORS")
-            # And we're lucky enough to get infected.
             if random.random() < self.infection_probability:
-                logging.debug("WE'RE GETTING INFECTED")
-                # Get infected by a mutation of a random neighbor.
-                logging.debug("CHOOSING A RANDOM NEIGBOR")
                 if n := self.random_infected_neighbor:
-                    logging.debug(f"THE RANDOM NEIGHBOR IS {n}, {n.now}")
-                    # Take random infected neighboring cell & inherit from it.
                     self.nxt = n.mutated_genome
 
     def tick(self):
+        """Tick the internal time since a significant event by 1."""
         self.now.tick += 1
 
     def transfer_state_i_to_r(self):
@@ -182,13 +188,9 @@ class Cell(Agent):
         CellSTATE.RESISTANT, if more time than self.infection_duration has
         passed, else just increment current tick.
         """
-        logging.debug(f"ON INFECTED {self.position=}, {self.now=}")
         if self.now.tick > self.now.infection_duration:
-            print(f"RECOVERING {self.position}, "
-                  f"{self.now.infection_duration, self.now.tick}")
             self.nxt = self.transfer_genome(CellState.RESISTANT)
         else:
-            logging.debug(f"TICKING INFECTED {self.position=}, {self.now}")
             self.tick()
             self.nxt = self.mutated_genome
 
@@ -197,16 +199,11 @@ class Cell(Agent):
         CellSTATE.SUSCEPTIBLE, if more time than self.resistance_duration has
         passed, else just increment current tick.
         """
-        logging.debug(f"ON RESISTANT {self.position=}, {self.now=}")
         if self.now.tick > self.now.resistance_duration:
-            print(f"AGAIN SUSCEPTIBLE {self.position=}, "
-                  f"{self.now.resistance_duration, self.now.tick}")
             self.nxt = Genome()
         else:
-            logging.debug(f"TICKING SUSCEPTIBLE {self.position=}, {self.now=}")
             self.tick()
 
     def advance(self):
         """Set the now state to the nxt calculated internal state."""
-        logging.debug(f"NEXT: {self.nxt=}")
         self.now = self.nxt

@@ -1,16 +1,13 @@
 #!/usr/bin/env python
+"""
+
+
+"""
 import logging
-import statistics
-
 import server
-import model
-import cell
-
-print("HELLLO GOODBYE")
 
 if __name__ == '__main__':
     import argparse
-    print("HELLLO GOODBYE MAIN")
 
     parser = argparse.ArgumentParser(description='Run model', epilog='live long and prosper!')
     parser.add_argument('-i', action='store', type=float, default=2.0, help='Provide infectiousness (2.0 by default)')
@@ -31,15 +28,6 @@ if __name__ == '__main__':
     elif args.v == 3:
         logging.basicConfig(level=logging.DEBUG)
     logging.info(args)
-
-    # TODO this dirty trick sadly did not work: find another way or abandon.
-    try:
-        s = server.make_server(args.i, args.di, args.hi, args.dr, args.d,
-                               args.t, args.width, args.height)
-        s.launch()
-    except statistics.StatisticsError:
-        print("THERE ARE NO MORE INFECTED CELLS")
-    finally:
-        print("TERMINATING!")
-else:
-    s = server.make_server()
+    s = server.make_server(args.i, args.di, args.hi, args.dr, args.d,
+                           args.t, args.width, args.height)
+    s.launch()
