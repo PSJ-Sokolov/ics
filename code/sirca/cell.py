@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import typing
 from sys import float_info
 EPS = float_info.epsilon
-#import model
+# import model
 
 # from model import SIRModel
 
@@ -18,7 +18,8 @@ tick: typing.TypeAlias = int  # Ticks as type that have happened since event.
 class CellState(Enum):
     """An enum that determines the states that the cells in our CA can be in.
 
-    Because we use a SIR model they can either be S -- SUSCEPTIBLE, I -- INFECTED, or R -- RESISTANT
+    Because we use a SIR model they can either be S -- SUSCEPTIBLE,
+    I -- INFECTED, or R -- RESISTANT
     """
     SUSCEPTIBLE = auto()
     INFECTED = auto()
@@ -183,10 +184,11 @@ class Cell(Agent):
         """
         logging.debug(f"ON INFECTED {self.position=}, {self.now=}")
         if self.now.tick > self.now.infection_duration:
-            logging.debug(f"RECOVERING {self.position=}, {self.now=}")
+            print(f"RECOVERING {self.position}, "
+                  f"{self.now.infection_duration, self.now.tick}")
             self.nxt = self.transfer_genome(CellState.RESISTANT)
         else:
-            logging.debug(f"TICKING INFECTED {self.position=}, {self.now=}")
+            logging.debug(f"TICKING INFECTED {self.position=}, {self.now}")
             self.tick()
             self.nxt = self.mutated_genome
 
@@ -197,8 +199,9 @@ class Cell(Agent):
         """
         logging.debug(f"ON RESISTANT {self.position=}, {self.now=}")
         if self.now.tick > self.now.resistance_duration:
-            logging.debug(f"AGAIN SUSCEPTIBLE {self.position=}, {self.now=}")
-            self.nxt = self.transfer_genome(CellState.SUSCEPTIBLE)
+            print(f"AGAIN SUSCEPTIBLE {self.position=}, "
+                  f"{self.now.resistance_duration, self.now.tick}")
+            self.nxt = Genome()
         else:
             logging.debug(f"TICKING SUSCEPTIBLE {self.position=}, {self.now=}")
             self.tick()

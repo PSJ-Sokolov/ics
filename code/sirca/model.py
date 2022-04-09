@@ -39,12 +39,16 @@ def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1, w=100, h=100, t=True):
         def __init__(self, width: int, height: int):
             """"""
             # Set the model parameters:
-            self.infectiousness = 7
-            self.infection_duration = 3
-            self.resistance_duration = 1
+            n = 1
+            d = 10
+            s = -1
+            f = 1 + (s * (n/d))
+            self.infectiousness = 0.03
+            self.infection_duration = 10
+            self.resistance_duration = int(f * self.infection_duration)
             self.h_inf = 10
-            self.seed_density = 0.1
-            self.torus = False
+            self.seed_density = 10 / (w * h)
+            self.torus = True
 
             # Initialize components:
             self.grid = SingleGrid(width, height, torus=self.torus)
@@ -61,8 +65,9 @@ def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1, w=100, h=100, t=True):
                                         self.infectiousness,
                                         self.infection_duration,
                                         self.resistance_duration,
-                                        random.randint(0,
-                                                       self.infection_duration))
+                                        random.randint(0, self.infection_duration)
+                                        #0
+                                        )
                 self.grid.place_agent(c, (x, y))
                 self.schedule.add(c)
                 logging.debug(f"CELL: {c.now=}")
