@@ -31,67 +31,81 @@ fracS, fracI, fracR = frac_n(CS.SUSCEPTIBLE), frac_n(CS.INFECTED), frac_n(
     CS.RESISTANT)
 
 
-class SIRModel(mesa.Model):
-    """Description of the model"""
+def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1, w=100, h=100, t=True):
+    class SIRModel(mesa.Model):
+        """Description of the model"""
 
-    def __init__(self, width: int, height: int):
-        """"""
-        # Set the model parameters:
-        self.infectiousness: float = 2.0
-        self.infection_duration: cell.tick = 5  # Duration of infection
-        self.resistance_duration: cell.tick = 10
-        self.h_inf: float = 10  # Scaling of infectiousness
-        self.seed_density: float = 0.1
-        self.torus = True
+        def __init__(self, width: int, height: int):
+            """"""
+            # Set the model parameters:
+            self.infectiousness = 7
+            self.infection_duration = 3
+            self.resistance_duration = 1
+            self.h_inf = 10
+            self.seed_density = 0.1
+            self.torus = False
 
-        # Initialize components:
-        self.grid = mesa.space.SingleGrid(width, height, torus=self.torus)
-        self.schedule = mesa.time.SimultaneousActivation(self)
-        self.running = True
+            # Initialize components:
+            self.grid = SingleGrid(width, height, torus=self.torus)
+            print(f"SET THE GRID {self.grid=}")
+            self.schedule = SimultaneousActivation(self)
+            self.running = True
 
-        # Seed the board with infected cells randomly:
-        for (_, x, y) in self.grid.coord_iter():
-            # Place randomly generated individuals
-            c = cell.Cell((x, y), self)
-            if random.random() < self.seed_density:
-                c.now = cell.Genome(cell.CellState.INFECTED,
-                                    self.infectiousness,
-                                    self.infection_duration,
-                                    self.resistance_duration,
-                                    random.randint(0, self.infection_duration))
-            self.grid.place_agent(c, (x, y))
-            self.schedule.add(c)
+            # Seed the board with infected cells randomly:
+            for (_, x, y) in self.grid.coord_iter():
+                # Place randomly generated individuals
+                c = cell.Cell((x, y), self)
+                if random.random() < self.seed_density:
+                    c.now = cell.Genome(cell.CellState.INFECTED,
+                                        self.infectiousness,
+                                        self.infection_duration,
+                                        self.resistance_duration,
+                                        random.randint(0,
+                                                       self.infection_duration))
+                self.grid.place_agent(c, (x, y))
+                self.schedule.add(c)
+                print(f"CELL: {c.now=}")
 
-        # Plot fraction of population by type.
-        self.dataCollector1 = mesa.datacollection.DataCollector(
-            model_reporters={'S': fracS, 'I': fracI, 'R': fracR})
+            # Plot fraction of population by type.
+            self.dataCollector1 = mesa.datacollection.DataCollector(
+                model_reporters={'S': fracS, 'I': fracI, 'R': fracR})
 
-        # Plot mean_infection_duration
-        self.dataCollector2 = mesa.datacollection.DataCollector(
-            model_reporters={
-                "Mean_infection_duration": self.mean_infection_duration
-            })
+            # Plot mean_infection_duration
+            self.dataCollector2 = mesa.datacollection.DataCollector(
+                model_reporters={
+                    "Mean_infection_duration": self.mean_infection_duration
+                })
 
-    def mean_infection_duration(self):
-        """Computes the mean infection duration in all infected individuals"""
-        return mean(c.now.infection_duration for c in cs(self)
-                    if c.now.state == CS.INFECTED)
+            self.dataCollector3 = mesa.datacollection.DataCollector(
+                model_reporters={
+                    "Mean_resistance_duration": self.mean_resistance_duration
+                })
 
-    def step(self):
-        self.dataCollector1.collect(self)
-        self.dataCollector2.collect(self)
-        self.schedule.step()
+        def mean_infection_duration(self):
+            """Computes the mean infection duration in all infected individuals"""
+            return mean(c.now.infection_duration for c in cs(self)
+                        if c.now.state == CS.INFECTED)
 
+        def mean_infection_duration(self):
+            """Computes the mean infection duration in all infected individuals"""
+            return mean(c.now.infection_duration for c in cs(self)
+                        if c.now.state == CS.INFECTED)
 
-def model_factory(i=2.0, di=5, hi=10, dr=10, d=0.1, t=True) -> SIRModel:
-    class ParameterizedSIRModel(SIRModel):
-        def __init__(self, width, height):
-            super().__init__(width, height)
-            self.infectiousness = i
-            self.infection_duration = di
-            self.resistance_duration = dr
-            self.h_inf = hi
-            self.seed_density = d
-            self.torus = t
+        def mean_resistance_duration(self):
+            """Computes the mean resistance duration in all resistant individuals"""
+            return mean(c.now.resistance_duration for c in cs(self)
+                        if c.now.state == CS.INFECTED)
 
-    return ParameterizedSIRModel
+        @property
+        def parameters(self) -> str:
+            return f"i:{self.infectiousness} di:{self.infection_duration} " \
+                   f"dr:{self.resistance_duration} h_inf:{self.h_inf} " \
+                   f" d:{self.seed_density} t:{self.torus}"
+
+        def step(self):
+            self.dataCollector1.collect(self)
+            self.dataCollector2.collect(self)
+            self.dataCollector3.collect(self)
+            self.schedule.step()
+
+    return SIRModel

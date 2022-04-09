@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 # MESA INCLUDE:
+from mesa.visualization.TextVisualization import TextData
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.modules import ChartModule
 from mesa.visualization.ModularVisualization import ModularServer
@@ -47,10 +48,20 @@ chartSIR = ChartModule([
 chartMI = ChartModule([{"Label": "Mean_infection_duration", "Color": "Black"}],
                       data_collector_name="dataCollector2")
 
+chartDR = ChartModule([{"Label": "Mean_resistance_duration", "Color": "Black"}],
+                      data_collector_name="dataCollector3")
+
+def makeText(model):
+    return TextData(model, 'parameters')
 
 def make_server(i=2.0, di=5, hi=10, dr=10, d=0.1, t=True, w=100, h=100):
     """ Launch the server that will run and display the model """
-    return ModularServer(model_factory(i, di, hi, dr, d, t),
-                         [make_grid(w, h), chartSIR, chartMI],
+    m = model_factory(i, di, hi, dr, d, w, h, t)
+    text = TextData(m, 'parameters')
+    print("TEXT IS",text.__dict__)
+    return ModularServer(m,
+                         [make_grid(w, h), chartSIR, chartMI, chartDR,
+                          #text,
+                          ],
                          "SIR-model",
                          {"width": w, "height": h})

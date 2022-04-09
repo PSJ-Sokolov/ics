@@ -1,9 +1,13 @@
 from __future__ import annotations
+
+import logging
 import random
 from enum import Enum, auto
 from mesa import Agent, Model
 from dataclasses import dataclass
 import typing
+from sys import float_info
+EPS = float_info.epsilon
 #import model
 
 # from model import SIRModel
@@ -111,7 +115,14 @@ class Cell(Agent):
     @property
     def random_infected_neighbor(self) -> Cell:
         xs = list(self.infected_neighbors)
-        return random.choices(xs, [x.now.infectiousness for x in xs])[0]
+        xsi = [x.now.infectiousness for x in xs]
+        try:
+            n = random.choices(xs, xsi)[0]
+        except ValueError as err:
+            logging.debug(f"INFECTED NEIGBORS: {xs=} WEIGHTS!: {xsi=}, {err}")
+            raise SystemExit("CRASH AND BURN!")
+        else:
+            return n
 
     @property
     def infection_load(self) -> float:
@@ -131,11 +142,17 @@ class Cell(Agent):
         return self.infection_load / (self.infection_load + self.model.h_inf)
 
     @property
-    def mutated_genome(self, tick=0) -> Genome:
-        i = max(0.0, self.now.infectiousness + random.gauss(0, 1))
-        di = max(1, self.now.infection_duration + random.randrange(-1, 1))
-        dr = max(1, self.now.resistance_duration + random.randrange(-1, 1))
+    def mutated_genome(self) -> Genome:
+        i = max(EPS, self.now.infectiousness + random.gauss(0, 1))
+        di = max(1, self.now.infection_duration + random.randrange(-1, 2))
+        dr = max(1, self.now.resistance_duration + random.randrange(-1, 2))
         return Genome(CellState.INFECTED, i, di, dr, self.now.tick)
+
+    def transfer_genome(self, state: CellState) -> Genome:
+        """"""
+        x = self.now
+        return Genome(state, x.infectiousness, x.infection_duration,
+                      x.resistance_duration, tick=0)
 
     def transfer_state_s_to_i(self):
         """Transfer the state from CellState.SUSCEPTIBLE to
@@ -143,11 +160,16 @@ class Cell(Agent):
         passed, else just increment current tick.
         """
         # Do we have infected neighbors?
+        print("ON SUSCEPTIBLE CELL")
         if list(self.infected_neighbors):
+            print("THE SUSCEPTIBLE CELL HAS INFECTED NEIGHBORS")
             # And we're lucky enough to get infected.
             if random.random() < self.infection_probability:
+                print("WE'RE GETTING INFECTED")
                 # Get infected by a mutation of a random neighbor.
+                print("CHOOSING A RANDOM NEIGBOR")
                 if n := self.random_infected_neighbor:
+                    print(f"THE RANDOM NEIGHBOR IS {n}, {n.now}")
                     # Take random infected neighboring cell & inherit from it.
                     self.nxt = n.mutated_genome
 
@@ -159,9 +181,12 @@ class Cell(Agent):
         CellSTATE.RESISTANT, if more time than self.infection_duration has
         passed, else just increment current tick.
         """
+        print(f"ON INFECTED {self.position=}, {self.now=}")
         if self.now.tick > self.now.infection_duration:
-            self.nxt = Genome(CellState.RESISTANT)
+            print(f"RECOVERING {self.position=}, {self.now=}")
+            self.nxt = self.transfer_genome(CellState.RESISTANT)
         else:
+            print(f"TICKING INFECTED {self.position=}, {self.now=}")
             self.tick()
             self.nxt = self.mutated_genome
 
@@ -170,11 +195,15 @@ class Cell(Agent):
         CellSTATE.SUSCEPTIBLE, if more time than self.resistance_duration has
         passed, else just increment current tick.
         """
+        print(f"ON RESISTANT {self.position=}, {self.now=}")
         if self.now.tick > self.now.resistance_duration:
-            self.nxt = Genome(CellState.SUSCEPTIBLE)
+            print(f"AGAIN SUSCEPTIBLE {self.position=}, {self.now=}")
+            self.nxt = self.transfer_genome(CellState.SUSCEPTIBLE)
         else:
+            print(f"TICKING SUSCEPTIBLE {self.position=}, {self.now=}")
             self.tick()
 
     def advance(self):
         """Set the now state to the nxt calculated internal state."""
+        print(f"NEXT: {self.nxt=}")
         self.now = self.nxt
